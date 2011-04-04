@@ -306,7 +306,8 @@ bool Minion::IsGuardianPet() const
     return isPet() || (m_Properties && m_Properties->Category == SUMMON_CATEGORY_PET);
 }
 
-Guardian::Guardian(SummonPropertiesEntry const *properties, Unit *owner) : Minion(properties, owner)
+Guardian::Guardian(SummonPropertiesEntry const *properties, Unit *owner) : Minion(properties, owner),
+m_PetScalingData(NULL)
 {
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
     if (properties && properties->Type == SUMMON_TYPE_PET)
@@ -314,6 +315,7 @@ Guardian::Guardian(SummonPropertiesEntry const *properties, Unit *owner) : Minio
         m_unitTypeMask |= UNIT_MASK_CONTROLABLE_GUARDIAN;
         InitCharmInfo();
     }
+    m_baseBonusData = new PetScalingData;
 }
 
 void Guardian::InitStats(uint32 duration)

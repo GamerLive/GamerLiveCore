@@ -63,7 +63,7 @@ bool Player::UpdateStats(Stats stat)
     SetStat(stat, int32(value));
 
     if (IsInWorld())
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_STAT, stat, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_STAT, stat, false));
 
     switch(stat)
     {
@@ -138,8 +138,8 @@ void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 
     if (IsInWorld())
     {
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKPOWER, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_SPELLDAMAGE, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKPOWER, 0, false));
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_SPELLDAMAGE, 0, false));
     }
 }
 
@@ -153,8 +153,8 @@ void Player::UpdateSpellDamageAndHealingBonus()
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
         SetStatInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, SpellBaseDamageBonus(SpellSchoolMask(1 << i)));
 
-    CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKPOWER, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
-    CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_SPELLDAMAGE, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+    CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKPOWER, 0, false));
+    CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_SPELLDAMAGE, 0, false));
 }
 
 bool Player::UpdateAllStats()
@@ -199,7 +199,7 @@ void Player::UpdateResistances(uint32 school)
     else
         UpdateArmor();
 
-    CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_RESISTANCE, school, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+    CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_RESISTANCE, school, false));
 }
 
 void Player::UpdateArmor()
@@ -420,9 +420,9 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
 
     if (IsInWorld())
     {
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKPOWER, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_SPELLDAMAGE, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_DAMAGE, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKPOWER, 0, false));
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_SPELLDAMAGE, 0, false));
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_DAMAGE, 0, false));
     }
 }
 
@@ -657,7 +657,7 @@ void Player::UpdateMeleeHitChances()
     m_modMeleeHitChance += GetRatingBonusValue(CR_HIT_MELEE);
 
     if (IsInWorld())
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_HIT, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_HIT, 0, false));
 }
 
 void Player::UpdateRangedHitChances()
@@ -672,7 +672,7 @@ void Player::UpdateSpellHitChances()
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
 
     if (IsInWorld())
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_SPELLHIT, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_SPELLHIT, 0, false));
 }
 
 void Player::UpdateAllSpellCritChances()
@@ -712,7 +712,7 @@ void Player::UpdateExpertise(WeaponAttackType attack)
     }
 
     if (IsInWorld())
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_EXPERTIZE, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_EXPERTIZE, 0, false));
 }
 
 void Player::ApplyManaRegenBonus(int32 amount, bool apply)
@@ -753,7 +753,7 @@ void Player::UpdateManaRegen()
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, power_regen_mp5 + power_regen);
 
     if (IsInWorld())
-        CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_POWERREGEN, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
+        CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_POWERREGEN, 0, false));
 }
 
 void Player::_ApplyAllStatBonuses()
@@ -1267,9 +1267,10 @@ void Guardian::ApplyAttackPowerScalingBonus(bool apply)
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
         return;
 
-    int32 newAPBonus;
+    int32 newAPBonus = 0;
 
-    switch(ToPet()->getPetType())
+    if (Pet * pet = ToPet()) // prevent crashes
+    switch(pet->getPetType())
     {
         /*case GUARDIAN_PET:
         case PROTECTOR_PET:
@@ -1314,7 +1315,6 @@ void Guardian::ApplyAttackPowerScalingBonus(bool apply)
             newAPBonus = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
             break;
         default:
-            newAPBonus = 0;
             break;
     }
 
@@ -1368,9 +1368,10 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
         return;
 
-    int32 newDamageBonus;
+    int32 newDamageBonus = 0;
 
-    switch(ToPet()->getPetType())
+    if (Pet * pet = ToPet()) // prevent crashes
+    switch(pet->getPetType())
     {
         case SUMMON_PET:
         /*case GUARDIAN_PET:
@@ -1386,13 +1387,11 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
                     newDamageBonus = owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW);
                     break;
                 default:
-                    newDamageBonus = 0;
                     break;
             }
             break;
         }
         default:
-            newDamageBonus = 0;
             break;
     }
 
@@ -1445,9 +1444,10 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
         return;
 
-    int32 newDamageBonus;
+    int32 newDamageBonus = 0;
 
-    switch(ToPet()->getPetType())
+    if (Pet * pet = ToPet()) // prevent crashes
+    switch(pet->getPetType())
     {
         /*case GUARDIAN_PET:
         case PROTECTOR_PET:
@@ -1479,7 +1479,6 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
                     newDamageBonus = std::max(owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST),owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE));
                     break;
                 default:
-                    newDamageBonus = 0;
                     break;
             }
             break;
@@ -1488,7 +1487,6 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
             newDamageBonus = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
             break;
         default:
-            newDamageBonus = 0;
             break;
     }
 
@@ -1786,14 +1784,15 @@ PetScalingData* Guardian::CalculateScalingData(bool recalculate)
     m_PetScalingData = new PetScalingData;
 
     Unit* owner = GetOwner();
+    Pet* pet = ToPet(); // to prevent crashes
 
     PetScalingDataList const* pScalingDataList;
 
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)        // if no owner ising record for creature_id = 0. Must be exist.
         pScalingDataList = sObjectMgr->GetPetScalingData(0);
-	else if (ToPet()->getPetType() == HUNTER_PET)                      // Using creature_id = 1 for hunter pets
+	else if (pet && pet->getPetType() == HUNTER_PET)                      // Using creature_id = 1 for hunter pets
         pScalingDataList = sObjectMgr->GetPetScalingData(1);
-	else if (ToPet()->getPetType() == SUMMON_PET/* || petType == GUARDIAN_PET || petType == PROTECTOR_PET */)
+	else if (pet && pet->getPetType() == SUMMON_PET/* || petType == GUARDIAN_PET || petType == PROTECTOR_PET */)
     {
         pScalingDataList = sObjectMgr->GetPetScalingData(GetEntry());
         if (!pScalingDataList)

@@ -45,7 +45,7 @@ Pet::Pet(Player *owner, PetType type) : Guardian(NULL, owner),
 m_resetTalentsCost(0), m_resetTalentsTime(0), m_usedTalentCount(0),
 m_removed(false), m_owner(owner), m_happinessTimer(7500), m_petType(type),
 m_duration(0), m_auraRaidUpdateMask(0), m_loading(false), m_declinedname(NULL),
-/*m_PetScalingData(NULL),*/ m_HappinessState(0)
+/*m_PetScalingData(NULL), */m_HappinessState(0)
 {
     m_unitTypeMask |= UNIT_MASK_PET;
     if (type == HUNTER_PET)
@@ -60,7 +60,8 @@ m_duration(0), m_auraRaidUpdateMask(0), m_loading(false), m_declinedname(NULL),
     m_name = "Pet";
     m_regenTimer = PET_FOCUS_REGEN_INTERVAL;
 
-    m_baseBonusData = new PetScalingData;
+    // this one crashes server
+    //m_baseBonusData = new PetScalingData;
 
     m_isWorldObject = true;
 }
@@ -69,11 +70,12 @@ Pet::~Pet()
 {
     delete m_declinedname;
 
-    if (m_PetScalingData)
+    // this block crashes server
+    /*if (m_PetScalingData)
         delete m_PetScalingData;
 
     if (m_baseBonusData)
-        delete m_baseBonusData;
+        delete m_baseBonusData;*/
 }
 
 void Pet::AddToWorld()

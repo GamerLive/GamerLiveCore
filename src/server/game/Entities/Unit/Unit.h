@@ -1118,16 +1118,6 @@ struct CharmInfo
         GlobalCooldownMgr m_GlobalCooldownMgr;
 };
 
-// used in CallForAllControlledUnits/CheckAllControlledUnits
-enum ControlledUnitMask
-{
-    CONTROLLED_PET       = 0x01,
-    CONTROLLED_MINIPET   = 0x02,
-    CONTROLLED_GUARDIANS = 0x04,                            // including PROTECTOR_PET
-    CONTROLLED_CHARM     = 0x08,
-    CONTROLLED_TOTEMS    = 0x10,
-};
-
 // for clearing special attacks
 #define REACTIVE_TIMER_START 4000
 
@@ -1622,7 +1612,7 @@ class Unit : public WorldObject
         bool isPossessing(Unit* u) const { return u->isPossessed() && GetCharmGUID() == u->GetGUID(); }
 
         template<typename Func>
-        void CallForAllControlledUnits(Func const& func, uint32 controlledMask);
+        void CallForAllGuardians(Func const& func);
         template<typename Func>
         bool CheckAllControlledUnits(Func const& func, uint32 controlledMask) const;
 
@@ -2193,8 +2183,6 @@ class Unit : public WorldObject
         float GetCombatRatingReduction(CombatRating cr) const;
         uint32 GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const;
 
-        Pet* _GetPet(uint64 guid) const;                // for templated function without include need
-
         void SetFeared(bool apply);
         void SetConfused(bool apply);
         void SetStunned(bool apply);
@@ -2260,53 +2248,17 @@ namespace Trinity
 }
 
 template<typename Func>
-void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
+void Unit::CallForAllGuardians(Func const& func)
 {
     for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
     {
         Unit* unit = *itr;
         ++itr;
-        /*if (controlledMask & CONTROLLED_GUARDIANS && unit->ToCreature()->isSummon())
+
+        //if (controlledMask & CONTROLLED_PET && GetPetGUID() == unit->GetGUID())
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
             func(unit);
-        if (controlledMask & CONTROLLED_PET && unit->ToCreature()->isPet())
-            func(unit);*/
-        if (controlledMask & CONTROLLED_PET && GetPetGUID() == unit->GetGUID())
-            func(unit);
-        if (controlledMask & CONTROLLED_GUARDIANS && GetMinionGUID() == unit->GetGUID())
-            func(unit);
-			
-			//Pet* pet = ObjectAccessor::FindPet(unit->GetGUID());
-            /*if (controlledMask & CONTROLLED_CHARM && unit->ToCreature()->isCharm())
-                func(*unit);
-            if (controlledMask & CONTROLLED_TOTEMS && unit->ToCreature()->isCharm())
-                func(*unit);*/
     }
-
-    /*if (controlledMask & CONTROLLED_PET)
-        if (Pet* pet = GetPet())
-            func(pet);
-
-    if (controlledMask & CONTROLLED_MINIPET)
-        if (Unit* mini = GetMiniPet())
-            func(mini);
-
-    if (controlledMask & CONTROLLED_GUARDIANS)
-    {
-        for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
-            if (Pet* guardian = _GetPet(*(itr++)))
-                func(guardian);
-    }
-
-    if (controlledMask & CONTROLLED_TOTEMS)
-    {
-        for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
-            if (Unit *totem = _GetTotem(TotemSlot(i)))
-                func(totem);
-    }
-
-    if (controlledMask & CONTROLLED_CHARM)
-        if (Unit* charm = GetCharm())
-            func(charm);*/
 }
 
 template<typename Elem, typename Node>

@@ -9877,11 +9877,6 @@ Unit* Unit::SelectMagnetTarget(Unit *victim, SpellEntry const *spellInfo)
     return victim;
 }
 
-Pet* Unit::_GetPet(uint64 guid) const
-{
-    return ObjectAccessor::FindPet(guid);
-}
-
 Unit* Unit::GetFirstControlled() const
 {
     //Sequence: charmed, pet, other guardians
