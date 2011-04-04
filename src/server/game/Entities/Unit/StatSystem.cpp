@@ -1749,6 +1749,10 @@ bool Guardian::ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellpro
     if (bp2 < 0 || bp2 > 10000)
         bp2 = 0;
 
+    // to catch it
+    if (bp0 < 0 || bp0 > 10000 || bp1 < 0 || bp1 > 10000 || bp2 < 0 || bp2 > 10000)
+        sLog->outError("bug in ReapplyScalingAura happens! spell %u, bp0 %i, bp1 %i, bp2 %i",holder->GetId(),bp0,bp1,bp2);
+
     if (oldAura)
     {
 //    RemoveSingleAuraFromSpellAuraHolder(holder, index, AURA_REMOVE_BY_STACK);
