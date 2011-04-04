@@ -1725,18 +1725,18 @@ bool Guardian::ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellpro
 
     Aura* oldAura = holder->GetBase(); //GetAuraByEffectIndex(index);
 
-    int32 bp0;
-    int32 bp1;
-    int32 bp2;
-    if (oldAura->GetEffIndex() != 0)
+    int32 bp0 = 0;
+    int32 bp1 = 0;
+    int32 bp2 = 0;
+    if (holder->GetEffIndex() != 0)
         bp0 = oldAura->GetEffect(0)->GetAmount();
     else
         bp0 = basePoints;
-    if (oldAura->GetEffIndex() != 1)
+    if (holder->GetEffIndex() != 1)
         bp1 = oldAura->GetEffect(1)->GetAmount();
     else
         bp1 = basePoints;
-    if (oldAura->GetEffIndex() != 2)
+    if (holder->GetEffIndex() != 2)
         bp2 = oldAura->GetEffect(2)->GetAmount();
     else
         bp2 = basePoints;
