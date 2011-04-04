@@ -107,6 +107,31 @@ enum PetNameInvalidReason
     PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME              = 16
 };
 
+/*enum ScalingTarget
+{
+    SCALING_TARGET_ALL          = 0,
+    SCALING_TARGET_STAT,
+    SCALING_TARGET_RESISTANCE,
+    SCALING_TARGET_ATTACKPOWER,
+    SCALING_TARGET_DAMAGE,
+    SCALING_TARGET_SPELLDAMAGE,
+    SCALING_TARGET_HIT,
+    SCALING_TARGET_SPELLHIT,
+    SCALING_TARGET_EXPERTIZE,
+    SCALING_TARGET_POWERREGEN,
+    SCALING_TARGET_MAX
+};
+
+struct ScalingAction
+{
+    explicit ScalingAction(ScalingTarget _target, uint32 _stat, bool _apply ) :
+                                         target(_target), stat(_stat), apply(_apply)
+    {}
+    ScalingTarget target;
+    uint32        stat;
+    bool          apply;
+};*/
+
 typedef UNORDERED_MAP<uint32, PetSpell> PetSpellMap;
 typedef std::vector<uint32> AutoSpellList;
 
@@ -119,6 +144,7 @@ typedef std::vector<uint32> AutoSpellList;
 #define PET_FOCUS_REGEN_INTERVAL 4 * IN_MILLISECONDS
 
 class Player;
+//struct PetScalingData;
 
 class Pet : public Guardian
 {
@@ -188,6 +214,26 @@ class Pet : public Guardian
         void CastPetAura(PetAura const* aura);
         bool IsPetAura(Aura const* aura);
 
+        void RegenerateHealth(uint32 diff);
+        float OCTRegenHPPerSpirit();
+        float OCTRegenMPPerSpirit();
+        void CastPetPassiveAuras(bool current);
+        void ApplyHappinessBonus(bool apply);
+        /*void ApplyScalingBonus(ScalingAction* action);
+        void ApplyAllScalingBonuses(bool apply);
+        void ApplyStatScalingBonus(Stats stat, bool apply);
+        void ApplyResistanceScalingBonus(uint32 school, bool apply);
+        void ApplyAttackPowerScalingBonus(bool apply);
+        void ApplyDamageScalingBonus(bool apply);
+        void ApplySpellDamageScalingBonus(bool apply);
+        void ApplyHitScalingBonus(bool apply);
+        void ApplySpellHitScalingBonus(bool apply);
+        void ApplyExpertizeScalingBonus(bool apply);
+        void ApplyPowerregenScalingBonus(bool apply);
+        bool ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellproto, int32 basePoints);
+        PetScalingData* CalculateScalingData( bool recalculate = false );
+        void AddScalingAction(ScalingTarget target, uint32 stat, bool apply);*/
+
         void _LoadSpellCooldowns();
         void _SaveSpellCooldowns(SQLTransaction& trans);
         void _LoadAuras(uint32 timediff);
@@ -225,6 +271,8 @@ class Pet : public Guardian
         void SetAuraUpdateMaskForRaid(uint8 slot) { m_auraRaidUpdateMask |= (uint64(1) << slot); }
         void ResetAuraUpdateMaskForRaid() { m_auraRaidUpdateMask = 0; }
 
+        bool IsInWorld() const { return ( !m_loading && !m_removed && Object::IsInWorld()); }
+
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
@@ -238,6 +286,11 @@ class Pet : public Guardian
         uint64  m_auraRaidUpdateMask;
         bool    m_loading;
         uint32  m_regenTimer;
+        uint8   m_HappinessState;
+        /*PetScalingData*  m_PetScalingData;
+        PetScalingData*  m_baseBonusData;
+        std::queue<ScalingAction> m_scalingQueue;
+        uint8   m_HappinessState;*/
 
         DeclinedName *m_declinedname;
 
@@ -250,5 +303,16 @@ class Pet : public Guardian
         {
             ASSERT(false);
         }
+};
+
+struct ApplyScalingBonusWithHelper
+{
+    explicit ApplyScalingBonusWithHelper(ScalingTarget _target, uint32 _stat, bool _apply ) :
+                                         target(_target), stat(_stat), apply(_apply)
+    {}
+    void operator()(Unit* unit) const;
+    ScalingTarget target;
+    uint32 stat;
+    bool apply;
 };
 #endif

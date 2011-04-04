@@ -61,6 +61,33 @@ class Minion : public TempSummon
         float m_followAngle;
 };
 
+enum ScalingTarget
+{
+    SCALING_TARGET_ALL          = 0,
+    SCALING_TARGET_STAT,
+    SCALING_TARGET_RESISTANCE,
+    SCALING_TARGET_ATTACKPOWER,
+    SCALING_TARGET_DAMAGE,
+    SCALING_TARGET_SPELLDAMAGE,
+    SCALING_TARGET_HIT,
+    SCALING_TARGET_SPELLHIT,
+    SCALING_TARGET_EXPERTIZE,
+    SCALING_TARGET_POWERREGEN,
+    SCALING_TARGET_MAX
+};
+
+struct ScalingAction
+{
+    explicit ScalingAction(ScalingTarget _target, uint32 _stat, bool _apply ) :
+                                         target(_target), stat(_stat), apply(_apply)
+    {}
+    ScalingTarget target;
+    uint32        stat;
+    bool          apply;
+};
+
+struct PetScalingData;
+
 class Guardian : public Minion
 {
     public:
@@ -77,12 +104,32 @@ class Guardian : public Minion
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateDamagePhysical(WeaponAttackType attType);
+        void UpdateSpellPower();
+        void UpdateManaRegen();
 
-        int32 GetBonusDamage() { return m_bonusSpellDamage; }
-        void SetBonusDamage(int32 damage);
+        void RegenerateHealth(uint32 diff);
+        float OCTRegenHPPerSpirit();
+        float OCTRegenMPPerSpirit();
+        void ApplyScalingBonus(ScalingAction* action);
+        void ApplyAllScalingBonuses(bool apply);
+        void ApplyStatScalingBonus(Stats stat, bool apply);
+        void ApplyResistanceScalingBonus(uint32 school, bool apply);
+        void ApplyAttackPowerScalingBonus(bool apply);
+        void ApplyDamageScalingBonus(bool apply);
+        void ApplySpellDamageScalingBonus(bool apply);
+        void ApplyHitScalingBonus(bool apply);
+        void ApplySpellHitScalingBonus(bool apply);
+        void ApplyExpertizeScalingBonus(bool apply);
+        void ApplyPowerregenScalingBonus(bool apply);
+        bool ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellproto, int32 basePoints);
+        PetScalingData* CalculateScalingData( bool recalculate = false );
+        void AddScalingAction(ScalingTarget target, uint32 stat, bool apply);
+        void ApplyHappinessBonus(bool apply);
+
     protected:
-        int32   m_bonusSpellDamage;
-        float   m_statFromOwner[MAX_STATS];
+        PetScalingData*  m_PetScalingData;
+        PetScalingData*  m_baseBonusData;
+        std::queue<ScalingAction> m_scalingQueue;
 };
 
 class Puppet : public Minion
