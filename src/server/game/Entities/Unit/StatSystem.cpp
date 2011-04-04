@@ -1742,11 +1742,11 @@ bool Guardian::ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellpro
         bp2 = basePoints;
 
     // temp solution untill we find why it can take these values
-    if (bp0 < 0)
+    if (bp0 < 0 || bp0 > 10000)
         bp0 = 0;
-    if (bp1 < 0)
+    if (bp1 < 0 || bp1 > 10000)
         bp1 = 0;
-    if (bp2 < 0)
+    if (bp2 < 0 || bp2 > 10000)
         bp2 = 0;
 
     if (oldAura)
