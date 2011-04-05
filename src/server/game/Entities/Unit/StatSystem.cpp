@@ -1816,6 +1816,10 @@ bool Guardian::ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellpro
     else
         bp2 = basePoints;
 
+    // to catch a bug with strange values
+    if (bp0 < 0 || bp0 > 10000 || bp1 < 0 || bp1 > 10000 || bp2 < 0 || bp2 > 10000)
+        sLog->outError("bug in ReapplyScalingAura happens! spell %u, bp0 %i, bp1 %i, bp2 %i",holder->GetId(),bp0,bp1,bp2);
+
     // temp solution untill we find why it can take these values
     if (bp0 < 0 || bp0 > 10000)
         bp0 = 0;
@@ -1823,10 +1827,6 @@ bool Guardian::ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellpro
         bp1 = 0;
     if (bp2 < 0 || bp2 > 10000)
         bp2 = 0;
-
-    // to catch it
-    if (bp0 < 0 || bp0 > 10000 || bp1 < 0 || bp1 > 10000 || bp2 < 0 || bp2 > 10000)
-        sLog->outError("bug in ReapplyScalingAura happens! spell %u, bp0 %i, bp1 %i, bp2 %i",holder->GetId(),bp0,bp1,bp2);
 
     if (oldAura)
     {
