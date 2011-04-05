@@ -1262,6 +1262,7 @@ void Guardian::ApplyResistanceScalingBonus(uint32 school, bool apply)
 void Guardian::ApplyAttackPowerScalingBonus(bool apply)
 {
     Unit* owner = GetOwner();
+    Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
@@ -1269,10 +1270,9 @@ void Guardian::ApplyAttackPowerScalingBonus(bool apply)
 
     int32 newAPBonus = 0;
 
-    if (Pet * pet = ToPet()) // prevent crashes
-    switch(pet->getPetType())
+    /*switch(pet->getPetType())
     {
-        /*case GUARDIAN_PET:
+        case GUARDIAN_PET:
         case PROTECTOR_PET:
         {
             if (owner->getClass() == CLASS_SHAMAN)
@@ -1281,7 +1281,7 @@ void Guardian::ApplyAttackPowerScalingBonus(bool apply)
                 break;
             }
                              // No break another case!
-        }*/
+        }
         case SUMMON_PET:
         {
             switch(owner->getClass())
@@ -1316,6 +1316,37 @@ void Guardian::ApplyAttackPowerScalingBonus(bool apply)
             break;
         default:
             break;
+    }*/
+
+    if (pet->HasUnitTypeMask(UNIT_MASK_HUNTER_PET))
+        newAPBonus = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
+    else if (pet->HasUnitTypeMask(UNIT_MASK_SUMMON))
+    {
+        switch(owner->getClass())
+        {
+            case CLASS_WARLOCK:
+                newAPBonus = std::max(owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW),owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE));
+                break;
+            case CLASS_DEATH_KNIGHT:
+                newAPBonus = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+                break;
+            case CLASS_PRIEST:
+                newAPBonus = owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW);
+                break;
+            case CLASS_SHAMAN:
+                newAPBonus = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+                break;
+            case CLASS_MAGE:
+               newAPBonus = std::max(owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST),owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE));
+               break;
+            default:
+                break;
+        }
+    }
+    else if (pet->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+    {
+        if (owner->getClass() == CLASS_SHAMAN)
+            newAPBonus = owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_NATURE);
     }
 
     if(newAPBonus < 0)
@@ -1363,6 +1394,7 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
     // SpellPower for pets exactly same DamageBonus.
     //    m_baseBonusData->damageScale
     Unit* owner = GetOwner();
+    Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
@@ -1370,12 +1402,11 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
 
     int32 newDamageBonus = 0;
 
-    if (Pet * pet = ToPet()) // prevent crashes
-    switch(pet->getPetType())
+    /*switch(pet->getPetType())
     {
         case SUMMON_PET:
-        /*case GUARDIAN_PET:
-        case PROTECTOR_PET:*/
+        case GUARDIAN_PET:
+        case PROTECTOR_PET:
         case HUNTER_PET:
         {
             switch(owner->getClass())
@@ -1393,6 +1424,21 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
         }
         default:
             break;
+    }*/
+
+    if (pet->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+    {
+        switch(owner->getClass())
+        {
+            case CLASS_DEATH_KNIGHT:
+                newDamageBonus = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+                break;
+            case CLASS_PRIEST:
+                newDamageBonus = owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW);
+                break;
+            default:
+                break;
+        }
     }
 
     if (newDamageBonus < 0)
@@ -1439,6 +1485,7 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
 void Guardian::ApplySpellDamageScalingBonus(bool apply)
 {
     Unit* owner = GetOwner();
+    Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
@@ -1446,10 +1493,9 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
 
     int32 newDamageBonus = 0;
 
-    if (Pet * pet = ToPet()) // prevent crashes
-    switch(pet->getPetType())
+    /*switch(pet->getPetType())
     {
-        /*case GUARDIAN_PET:
+        case GUARDIAN_PET:
         case PROTECTOR_PET:
         {
             if (owner->getClass() == CLASS_SHAMAN)
@@ -1458,7 +1504,7 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
                 break;
             }
                              // No break another case!
-        }*/
+        }
         case SUMMON_PET:
         {
             switch(owner->getClass())
@@ -1488,6 +1534,37 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
             break;
         default:
             break;
+    }*/
+
+    if (pet->HasUnitTypeMask(UNIT_MASK_HUNTER_PET))
+        newDamageBonus = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
+    else if (pet->HasUnitTypeMask(UNIT_MASK_SUMMON))
+    {
+        switch(owner->getClass())
+        {
+            case CLASS_WARLOCK:
+                newDamageBonus = std::max(owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW),owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE));
+                break;
+            case CLASS_PRIEST:
+                newDamageBonus = owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW);
+                break;
+            case CLASS_DEATH_KNIGHT:
+                newDamageBonus = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+                break;
+            case CLASS_SHAMAN:
+                newDamageBonus = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+                break;
+            case CLASS_MAGE:
+                newDamageBonus = std::max(owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST),owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE));
+                break;
+            default:
+                break;
+        }
+    }
+    else if (pet->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+    {
+        if (owner->getClass() == CLASS_SHAMAN)
+            newDamageBonus = owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_NATURE);
     }
 
     if (newDamageBonus < 0)
@@ -1784,15 +1861,15 @@ PetScalingData* Guardian::CalculateScalingData(bool recalculate)
     m_PetScalingData = new PetScalingData;
 
     Unit* owner = GetOwner();
-    Pet* pet = ToPet(); // to prevent crashes
+    Unit* pet = ToUnit(); // to prevent crashes
 
     PetScalingDataList const* pScalingDataList;
 
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)        // if no owner ising record for creature_id = 0. Must be exist.
         pScalingDataList = sObjectMgr->GetPetScalingData(0);
-	else if (pet && pet->getPetType() == HUNTER_PET)                      // Using creature_id = 1 for hunter pets
+	else if (pet->HasUnitTypeMask(UNIT_MASK_HUNTER_PET))      // Using creature_id = 1 for hunter pets
         pScalingDataList = sObjectMgr->GetPetScalingData(1);
-	else if (pet && pet->getPetType() == SUMMON_PET/* || petType == GUARDIAN_PET || petType == PROTECTOR_PET */)
+	else if (pet->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
     {
         pScalingDataList = sObjectMgr->GetPetScalingData(GetEntry());
         if (!pScalingDataList)
@@ -1801,7 +1878,7 @@ PetScalingData* Guardian::CalculateScalingData(bool recalculate)
             pScalingDataList = sObjectMgr->GetPetScalingData(0);
         }
     }
-    else
+    else // maybe this not returned because of checks above for UNIT_MASK_GUARDIAN
     {
         sLog->outDebug(LOG_FILTER_PETS, "No selection type data list for pet %u! Get zero values", GetEntry());
         pScalingDataList = sObjectMgr->GetPetScalingData(0);
