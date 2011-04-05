@@ -1982,52 +1982,6 @@ void Pet::SynchronizeLevelWithOwner()
     }
 }
 
-void Pet::CastPetPassiveAuras(bool current)
-{
-    Unit* owner = GetOwner();
-
-    if(!owner || owner->GetTypeId()!=TYPEID_PLAYER)
-        return;
-
-    // Cast pet passive aura (if not casted as passive)
-    uint32 creature_id;
-
-    switch(getPetType())
-    {
-        case SUMMON_PET:
-        //case GUARDIAN_PET:
-        //case PROTECTOR_PET:
-            creature_id = GetEntry();
-            break;
-        case HUNTER_PET:
-            creature_id = 1;
-            break;
-        default:
-            creature_id = 0;
-            break;
-    }
-
-    PetPassiveAuraList const* pPassiveAuraList  =  sSpellMgr->GetPetPassiveAuraList(creature_id);
-
-    if (!pPassiveAuraList || pPassiveAuraList->empty())
-        return;
-
-    for (PetPassiveAuraList::const_iterator itr = pPassiveAuraList->begin(); itr != pPassiveAuraList->end(); ++itr)
-    {
-        PetAura const petAura = *itr;
-
-        uint32 auraID = petAura.GetAura(creature_id);
-
-        if (!current && HasAura(auraID))
-            RemoveAurasDueToSpell(auraID);
-        else if (current && !HasAura(auraID))
-        {
-            CastSpell(this, auraID, true);
-            sLog->outDebug(LOG_FILTER_PETS, "Cast passive pet aura %u", auraID);
-        }
-    }
-}
-
 /*void pet::RegenerateHealth(uint32 diff)
 {
     uint32 curValue = GetHealth();

@@ -6033,6 +6033,38 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                     target->SetEntry(apply ? 17654 : 17326);
                     break;
                 }
+                //Summon Fire Elemental
+                case 40133:
+                {
+                    if (!caster)
+                        break;
+
+                    Unit *owner = caster->GetOwner();
+                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (apply)
+                            owner->CastSpell(owner,8985,true);
+                        else
+                            owner->ToPlayer()->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
+                    }
+                    break;
+                }
+                //Summon Earth Elemental
+                case 40132 :
+                {
+                    if (!caster)
+                        break;
+
+                    Unit *owner = caster->GetOwner();
+                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (apply)
+                            owner->CastSpell(owner,19704,true);
+                        else
+                            owner->ToPlayer()->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
+                    }
+                    break;
+                }
                 case 57723: // Exhaustion
                 case 57724: // Sated
                 {

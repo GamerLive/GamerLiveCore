@@ -327,6 +327,20 @@ Guardian::~Guardian()
         delete m_baseBonusData;
 }
 
+void Guardian::Update(uint32 time)
+{
+    //Minion::Update(time);
+    TempSummon::Update(time); // i don't know what of these updates is better
+
+    // Update scaling auras from queue
+    if (IsInWorld())
+        while (!m_scalingQueue.empty())
+        {
+            ApplyScalingBonus(&m_scalingQueue.front());
+            m_scalingQueue.pop();
+        };
+}
+
 void Guardian::InitStats(uint32 duration)
 {
     Minion::InitStats(duration);
@@ -335,6 +349,14 @@ void Guardian::InitStats(uint32 duration)
 
     if (m_owner->GetTypeId() == TYPEID_PLAYER && HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
         m_charmInfo->InitCharmCreateSpells();
+
+    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        CastPetPassiveAuras(true);
+        CalculateScalingData(true);
+        ApplyAllScalingBonuses(true);
+        LoadCreaturesAddon(true);
+    }
 
     SetReactState(REACT_AGGRESSIVE);
 }

@@ -1160,7 +1160,7 @@ void Guardian::ApplyStatScalingBonus(Stats stat, bool apply)
     Unit* owner = GetOwner();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
 
     UnitMods unitMod = UnitMods(stat);
@@ -1209,7 +1209,7 @@ void Guardian::ApplyResistanceScalingBonus(uint32 school, bool apply)
     Unit* owner = GetOwner();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
 
     int32 newResistance;
@@ -1265,7 +1265,7 @@ void Guardian::ApplyAttackPowerScalingBonus(bool apply)
     Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
 
     int32 newAPBonus = 0;
@@ -1397,7 +1397,7 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
     Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
 
     int32 newDamageBonus = 0;
@@ -1488,7 +1488,7 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
     Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
 
     int32 newDamageBonus = 0;
@@ -1628,7 +1628,7 @@ void Guardian::ApplyHitScalingBonus(bool apply)
     Unit* owner = GetOwner();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
     int32 m_MeleeHitChance = owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
     m_MeleeHitChance +=  ((Player*)owner)->GetRatingBonusValue(CR_HIT_MELEE);
@@ -1669,7 +1669,7 @@ void Guardian::ApplySpellHitScalingBonus(bool apply)
     Unit* owner = GetOwner();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
 
     int32 m_SpellHitChance = owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
@@ -1711,7 +1711,7 @@ void Guardian::ApplyExpertizeScalingBonus(bool apply)
     Unit* owner = GetOwner();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
     int32 m_expertize = owner->GetUInt32Value(PLAYER_EXPERTISE);
 
@@ -1752,7 +1752,7 @@ void Guardian::ApplyPowerregenScalingBonus(bool apply)
     Unit* owner = GetOwner();
 
     // Don't apply scaling bonuses if no owner or owner is not player
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ToPet()->m_removed)
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
 
     int32 m_manaregen = int32(owner->GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER));
@@ -1971,7 +1971,8 @@ void Guardian::AddScalingAction(ScalingTarget target, uint32 stat, bool apply)
 
 void ApplyScalingBonusWithHelper::operator() (Unit* unit) const
 {
-    if (!unit || !unit->isPet())
+    //if (!unit || !unit->isPet())
+    if (!unit || !unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
         return;
 
     Pet* pet = (Pet*)unit;
@@ -2027,4 +2028,56 @@ float Guardian::OCTRegenMPPerSpirit()
     float spirit    = GetStat(STAT_SPIRIT);
     float regen     = spirit * moreRatio->ratio;
     return regen;
+}
+
+void Guardian::CastPetPassiveAuras(bool current)
+{
+    Unit* owner = GetOwner();
+    Unit* pet = ToUnit();
+
+    if(!owner || owner->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
+    // Cast pet passive aura (if not casted as passive)
+    uint32 creature_id = 0;
+
+    if (pet->HasUnitTypeMask(UNIT_MASK_HUNTER_PET))
+        creature_id = 1;
+    else if (pet->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+        creature_id = GetEntry();
+
+    /*switch(getPetType())
+    {
+        case SUMMON_PET:
+        case GUARDIAN_PET:
+        case PROTECTOR_PET:
+            creature_id = GetEntry();
+            break;
+        case HUNTER_PET:
+            creature_id = 1;
+            break;
+        default:
+            creature_id = 0;
+            break;
+    }*/
+
+    PetPassiveAuraList const* pPassiveAuraList  =  sSpellMgr->GetPetPassiveAuraList(creature_id);
+
+    if (!pPassiveAuraList || pPassiveAuraList->empty())
+        return;
+
+    for (PetPassiveAuraList::const_iterator itr = pPassiveAuraList->begin(); itr != pPassiveAuraList->end(); ++itr)
+    {
+        PetAura const petAura = *itr;
+
+        uint32 auraID = petAura.GetAura(creature_id);
+
+        if (!current && HasAura(auraID))
+            RemoveAurasDueToSpell(auraID);
+        else if (current && !HasAura(auraID))
+        {
+            CastSpell(this, auraID, true);
+            sLog->outDebug(LOG_FILTER_PETS, "Cast passive pet aura %u", auraID);
+        }
+    }
 }

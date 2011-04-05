@@ -93,6 +93,7 @@ class Guardian : public Minion
     public:
         Guardian(SummonPropertiesEntry const *properties, Unit *owner);
         virtual ~Guardian();
+        void Update(uint32 time);
         void InitStats(uint32 duration);
         bool InitStatsForLevel(uint8 level);
         void InitSummon();
@@ -126,6 +127,8 @@ class Guardian : public Minion
         PetScalingData* CalculateScalingData( bool recalculate = false );
         void AddScalingAction(ScalingTarget target, uint32 stat, bool apply);
         void ApplyHappinessBonus(bool apply);
+
+        void CastPetPassiveAuras(bool current);
 
     protected:
         PetScalingData*  m_PetScalingData;

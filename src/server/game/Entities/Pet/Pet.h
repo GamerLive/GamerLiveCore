@@ -217,7 +217,6 @@ class Pet : public Guardian
         void RegenerateHealth(uint32 diff);
         float OCTRegenHPPerSpirit();
         float OCTRegenMPPerSpirit();
-        void CastPetPassiveAuras(bool current);
         void ApplyHappinessBonus(bool apply);
         /*void ApplyScalingBonus(ScalingAction* action);
         void ApplyAllScalingBonuses(bool apply);
