@@ -318,6 +318,15 @@ m_PetScalingData(NULL)
     m_baseBonusData = new PetScalingData;
 }
 
+Guardian::~Guardian()
+{
+    if (m_PetScalingData)
+        delete m_PetScalingData;
+
+    if (m_baseBonusData)
+        delete m_baseBonusData;
+}
+
 void Guardian::InitStats(uint32 duration)
 {
     Minion::InitStats(duration);

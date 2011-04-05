@@ -92,6 +92,7 @@ class Guardian : public Minion
 {
     public:
         Guardian(SummonPropertiesEntry const *properties, Unit *owner);
+        virtual ~Guardian();
         void InitStats(uint32 duration);
         bool InitStatsForLevel(uint8 level);
         void InitSummon();
