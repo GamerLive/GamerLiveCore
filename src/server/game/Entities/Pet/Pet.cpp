@@ -877,8 +877,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
     PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(cinfo->Entry, petlevel);
 
-    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-
     SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
 
     int32 createStats[MAX_STATS+7] =  {22,     // STAT_STRENGTH
