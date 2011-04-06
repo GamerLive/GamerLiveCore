@@ -1191,8 +1191,8 @@ void Guardian::ApplyStatScalingBonus(Stats stat, bool apply)
             && (spellproto->AttributesEx4 & SPELL_ATTR4_PET_SCALING_AURA))
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1243,8 +1243,8 @@ void Guardian::ApplyResistanceScalingBonus(uint32 school, bool apply)
             && (spellproto->EffectMiscValue[(*itr)->GetEffIndex()] & (1 << SpellSchools(school))))
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1375,8 +1375,8 @@ void Guardian::ApplyAttackPowerScalingBonus(bool apply)
         if (spellproto->AttributesEx4 & SPELL_ATTR4_PET_SCALING_AURA)
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1468,8 +1468,8 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
             && spellproto->EffectMiscValue[(*itr)->GetEffIndex()] == SPELL_SCHOOL_MASK_ALL)
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1594,8 +1594,8 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
             && spellproto->EffectMiscValue[(*itr)->GetEffIndex()] == SPELL_SCHOOL_MASK_MAGIC)
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1656,8 +1656,8 @@ void Guardian::ApplyHitScalingBonus(bool apply)
         if (spellproto->AttributesEx4 & SPELL_ATTR4_PET_SCALING_AURA)
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1698,8 +1698,8 @@ void Guardian::ApplySpellHitScalingBonus(bool apply)
         if (spellproto->AttributesEx4 & SPELL_ATTR4_PET_SCALING_AURA)
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1738,8 +1738,8 @@ void Guardian::ApplyExpertizeScalingBonus(bool apply)
         if (spellproto->AttributesEx4 & SPELL_ATTR4_PET_SCALING_AURA)
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1780,8 +1780,8 @@ void Guardian::ApplyPowerregenScalingBonus(bool apply)
         if (spellproto->AttributesEx4 & SPELL_ATTR4_PET_SCALING_AURA)
         {
             SetCanModifyStats(false);
-            if (ReapplyScalingAura((*itr), spellproto, basePoints))
-                needRecalculateStat = true;
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
             SetCanModifyStats(true);
             break;
         }
@@ -1789,66 +1789,6 @@ void Guardian::ApplyPowerregenScalingBonus(bool apply)
 
     if(needRecalculateStat)
         UpdateManaRegen();
-}
-
-bool Guardian::ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellproto, int32 basePoints)
-{
-    if (!holder/* || holder->IsDeleted() || holder->IsEmptyHolder() || holder->IsInUse()*/)
-        return false;
-
-    /*holder->SetInUse(true);*/
-
-    Aura* oldAura = holder->GetBase(); //GetAuraByEffectIndex(index);
-
-    int32 bp0 = 0;
-    int32 bp1 = 0;
-    int32 bp2 = 0;
-    if (holder->GetEffIndex() != 0)
-        bp0 = oldAura->GetEffect(0)->GetAmount();
-    else
-        bp0 = basePoints;
-    if (holder->GetEffIndex() != 1)
-        bp1 = oldAura->GetEffect(1)->GetAmount();
-    else
-        bp1 = basePoints;
-    if (holder->GetEffIndex() != 2)
-        bp2 = oldAura->GetEffect(2)->GetAmount();
-    else
-        bp2 = basePoints;
-
-    // to catch a bug with strange values
-    if (bp0 < 0 || bp0 > 10000 || bp1 < 0 || bp1 > 10000 || bp2 < 0 || bp2 > 10000)
-        sLog->outError("bug in ReapplyScalingAura happens! spell %u, bp0 %i, bp1 %i, bp2 %i",holder->GetId(),bp0,bp1,bp2);
-
-    // temp solution untill we find why it can take these values
-    if (bp0 < 0 || bp0 > 10000)
-        bp0 = 0;
-    if (bp1 < 0 || bp1 > 10000)
-        bp1 = 0;
-    if (bp2 < 0 || bp2 > 10000)
-        bp2 = 0;
-
-    if (oldAura)
-    {
-//    RemoveSingleAuraFromSpellAuraHolder(holder, index, AURA_REMOVE_BY_STACK);
-        RemoveAura(oldAura, AURA_REMOVE_BY_STACK);
-    }
-
-    CastCustomSpell(this, holder->GetId(), &bp0, &bp1, &bp2, true);
-
-    /*if (Aura * newAura = AddAura(holder->GetId(), this))
-        //newAura->SetDuration(newAura->GetMaxDuration());
-        newAura->GetEffect(holder->GetEffIndex())->SetAmount(basePoints);*/
-
-    /*Aura* aura = CreateAura(spellproto, holder->GetEffIndex(), &basePoints, holder, this, this, NULL);
-    AddAura(aura, holder->GetEffIndex());
-    holder->SetAuraDuration(aura->GetAuraMaxDuration());
-    AddAuraToModList(aura);
-    aura->ApplyModifier(true,true);
-
-    holder->SetInUse(false);*/
-
-    return true;
 }
 
 PetScalingData* Guardian::CalculateScalingData(bool recalculate)

@@ -123,7 +123,6 @@ class Guardian : public Minion
         void ApplySpellHitScalingBonus(bool apply);
         void ApplyExpertizeScalingBonus(bool apply);
         void ApplyPowerregenScalingBonus(bool apply);
-        bool ReapplyScalingAura(AuraEffect* holder, SpellEntry const *spellproto, int32 basePoints);
         PetScalingData* CalculateScalingData( bool recalculate = false );
         void AddScalingAction(ScalingTarget target, uint32 stat, bool apply);
         void ApplyHappinessBonus(bool apply);
