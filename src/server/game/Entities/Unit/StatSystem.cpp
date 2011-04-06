@@ -1016,8 +1016,8 @@ void Guardian::UpdateArmor()
 
 void Guardian::UpdateMaxHealth()
 {
-    if (!CanModifyStats())
-        return;
+    //if (!CanModifyStats())
+    //    return;
 
     UnitMods unitMod = UNIT_MOD_HEALTH;
     float staminaBonus = (GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA)) * (CalculateScalingData()->healthScale / 100.0f);
@@ -1032,8 +1032,8 @@ void Guardian::UpdateMaxHealth()
 
 void Guardian::UpdateMaxPower(Powers power)
 {
-    if (!CanModifyStats())
-        return;
+    //if (!CanModifyStats())
+    //    return;
 
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
