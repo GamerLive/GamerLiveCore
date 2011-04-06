@@ -608,11 +608,12 @@ void Pet::Update(uint32 diff)
     }
 
     // Update scaling auras from queue
-    while (!m_scalingQueue.empty())
-    {
-        ApplyScalingBonus(&m_scalingQueue.front());
-        m_scalingQueue.pop();
-    };
+    if (isAlive())
+        while (!m_scalingQueue.empty())
+        {
+            ApplyScalingBonus(&m_scalingQueue.front());
+            m_scalingQueue.pop();
+        };
 
     Creature::Update(diff);
 }
@@ -912,8 +913,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         createStats[MAX_STATS]    = int32(cinfo->ModHealth * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
         createStats[MAX_STATS+1]  = int32(cinfo->ModMana * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
         createStats[MAX_STATS+2]  = int32(cinfo->attackpower * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
-        createStats[MAX_STATS+3]  = int32( cinfo->mindmg * petlevel / cinfo->maxlevel / (1 + cinfo->rank));
-        createStats[MAX_STATS+4]  = int32( cinfo->maxdmg * petlevel / cinfo->maxlevel / (1 + cinfo->rank));
+        createStats[MAX_STATS+3]  = int32(cinfo->mindmg * petlevel / cinfo->maxlevel / (1 + cinfo->rank));
+        createStats[MAX_STATS+4]  = int32(cinfo->maxdmg * petlevel / cinfo->maxlevel / (1 + cinfo->rank));
         createStats[MAX_STATS+5]  = int32(cinfo->minrangedmg * petlevel / cinfo->maxlevel/ (1 + cinfo->rank));
         createStats[MAX_STATS+6]  = int32(cinfo->maxrangedmg * petlevel / cinfo->maxlevel/ (1 + cinfo->rank));
         SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(cinfo->maxrangedmg * petlevel / cinfo->maxlevel));
@@ -1562,6 +1563,15 @@ void Pet::InitPetCreateSpells()
     InitLevelupSpellsForLevel();
 
     CastPetAuras(false);
+
+    /*if (getPetType() != HUNTER_PET)
+        LoadCreaturesAddon(true);
+
+    if (GetOwner()->GetTypeId() == TYPEID_PLAYER)
+    {
+        CastPetPassiveAuras(true);
+        ApplyAllScalingBonuses(true);
+    }*/
 }
 
 bool Pet::resetTalents(bool no_cost)

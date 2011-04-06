@@ -333,7 +333,7 @@ void Guardian::Update(uint32 time)
     TempSummon::Update(time); // i don't know what of these updates is better
 
     // Update scaling auras from queue
-    if (IsInWorld())
+    if (IsInWorld() && isAlive())
         while (!m_scalingQueue.empty())
         {
             ApplyScalingBonus(&m_scalingQueue.front());
