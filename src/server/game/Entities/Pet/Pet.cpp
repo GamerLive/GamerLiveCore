@@ -1562,14 +1562,14 @@ void Pet::InitPetCreateSpells()
 
     CastPetAuras(false);
 
-    /*if (getPetType() != HUNTER_PET)
+    if (getPetType() != HUNTER_PET)
         LoadCreaturesAddon(true);
 
     if (GetOwner()->GetTypeId() == TYPEID_PLAYER)
     {
         CastPetPassiveAuras(true);
         ApplyAllScalingBonuses(true);
-    }*/
+    }
 }
 
 bool Pet::resetTalents(bool no_cost)
