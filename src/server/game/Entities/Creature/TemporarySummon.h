@@ -125,7 +125,6 @@ class Guardian : public Minion
         void ApplyPowerregenScalingBonus(bool apply);
         PetScalingData* CalculateScalingData( bool recalculate = false );
         void AddScalingAction(ScalingTarget target, uint32 stat, bool apply);
-        void ApplyHappinessBonus(bool apply);
 
         void CastPetPassiveAuras(bool current);
 

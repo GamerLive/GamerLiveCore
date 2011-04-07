@@ -1575,7 +1575,6 @@ class Unit : public WorldObject
         Minion *GetFirstMinion() const;
         Unit* GetCharmer() const;
         Unit* GetCharm() const;
-        Unit* GetCreator() const;
         Unit* GetCharmerOrOwner() const { return GetCharmerGUID() ? GetCharmer() : GetOwner(); }
         Unit* GetCharmerOrOwnerOrSelf() const
         {
@@ -2255,7 +2254,6 @@ void Unit::CallForAllGuardians(Func const& func)
         Unit* unit = *itr;
         ++itr;
 
-        //if (controlledMask & CONTROLLED_PET && GetPetGUID() == unit->GetGUID())
         if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
             func(unit);
     }

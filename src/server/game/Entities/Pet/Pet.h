@@ -246,10 +246,6 @@ class Pet : public Guardian
         bool    m_loading;
         uint32  m_regenTimer;
         uint8   m_HappinessState;
-        /*PetScalingData*  m_PetScalingData;
-        PetScalingData*  m_baseBonusData;
-        std::queue<ScalingAction> m_scalingQueue;
-        uint8   m_HappinessState;*/
 
         DeclinedName *m_declinedname;
 

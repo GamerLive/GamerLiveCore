@@ -13517,8 +13517,6 @@ CharmInfo::CharmInfo(Unit* unit)
         m_oldReactState = m_unit->ToCreature()->GetReactState();
         m_unit->ToCreature()->SetReactState(REACT_PASSIVE);
     }
-
-    m_petnumber = 0;
 }
 
 CharmInfo::~CharmInfo()
