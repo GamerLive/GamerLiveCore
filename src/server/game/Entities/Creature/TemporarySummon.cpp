@@ -350,14 +350,6 @@ void Guardian::InitStats(uint32 duration)
     if (m_owner->GetTypeId() == TYPEID_PLAYER && HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
         m_charmInfo->InitCharmCreateSpells();
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        CastPetPassiveAuras(true);
-        CalculateScalingData(true);
-        ApplyAllScalingBonuses(true);
-        LoadCreaturesAddon(true);
-    }
-
     SetReactState(REACT_AGGRESSIVE);
 }
 

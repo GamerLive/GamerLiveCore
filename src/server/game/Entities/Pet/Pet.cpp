@@ -250,10 +250,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetReactState(ReactStates(fields[6].GetUInt8()));
     SetCanModifyStats(true);
 
-    CastPetPassiveAuras(true);
-    CalculateScalingData(true);
-    ApplyAllScalingBonuses(true);
-
     if (getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     else
@@ -320,10 +316,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         InitLevelupSpellsForLevel();
         CastPetAuras(current);
     }
-
-    // maybe this wrong cause only guardians should load it (for example warlock's Inferno)
-    if (getPetType() != HUNTER_PET)
-        LoadCreaturesAddon(true);
 
     CleanupActionBar();                                     // remove unknown spells from action bar after load
 
@@ -1035,6 +1027,15 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
+    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (petType != HUNTER_PET)
+            LoadCreaturesAddon(true);
+        CastPetPassiveAuras(true);
+        CalculateScalingData(true);
+        ApplyAllScalingBonuses(true);
+    }
+
     UpdateAllStats();
 
     SetFullHealth();
@@ -1562,15 +1563,6 @@ void Pet::InitPetCreateSpells()
     InitLevelupSpellsForLevel();
 
     CastPetAuras(false);
-
-    if (getPetType() != HUNTER_PET)
-        LoadCreaturesAddon(true);
-
-    if (GetOwner()->GetTypeId() == TYPEID_PLAYER)
-    {
-        CastPetPassiveAuras(true);
-        ApplyAllScalingBonuses(true);
-    }
 }
 
 bool Pet::resetTalents(bool no_cost)
