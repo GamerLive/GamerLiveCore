@@ -1034,20 +1034,6 @@ INSERT INTO `spell_pet_auras` VALUES
 -- UPDATE `creature_template` SET `spell1` = 12470, `spell2` = 57984 WHERE `entry` = 15438;
 -- UPDATE `creature_template` SET `spell1` = 36213 WHERE `entry` = 15352;
 
-UPDATE `creature_template` SET `spell1` = 0, `spell2` = 0 WHERE `entry` = 15438;
-UPDATE `creature_template` SET `spell1` = 0, `spell2` = 0 WHERE `entry` = 15352;
-
-
-UPDATE `creature_template` SET `spell1` = 40133 WHERE `entry` = 15439;
-UPDATE `creature_template` SET `spell1` = 40132 WHERE `entry` = 15430;
-
--- Fire Elemental & Earth Elemental summon
-DELETE FROM `event_scripts` WHERE `id` IN (14859,14858);
-INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES
-(14858, 1, 15, 33663, 1, 0, 0, 0, 0, 0),
-(14859, 1, 15, 32982, 1, 0, 0, 0, 0, 0);
-
-
 -- for warlock's talent Fel Vitality
 -- But seems this implementation is wrong. It should be implemented through "Tamed Pet Passive" auras
 DELETE FROM `pet_scaling_data` WHERE `aura` IN (18731,18743,18744);
