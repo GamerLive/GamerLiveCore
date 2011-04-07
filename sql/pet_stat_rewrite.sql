@@ -844,43 +844,28 @@ INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`
 -- Pet 416 - warlock imp
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 416;
 INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
-(416, 0, 0, 840, 0, 495, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 10, 100, 57, 0, 15, 100, 100, 100, 100, 0, 20),
-(416, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(416, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(416, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0);
+(416, 0, 0, 840, 0, 495, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 10, 100, 57, 0, 15, 100, 100, 100, 100, 0, 20);
 
 -- Pet 417 - warlock felhunter
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 417;
 INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
-(417, 0, 0, 950, 0, 1150, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 20, 200, 57, 0, 15, 100, 100, 100, 100, 0, 20),
-(417, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(417, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(417, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0);
+(417, 0, 0, 950, 0, 1150, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 20, 200, 57, 0, 15, 100, 100, 100, 100, 0, 20);
 
 -- Pet 1860 - warlock voidwalker
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 1860;
 INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
 (1860,     0, 0, 1100, 0, 1150, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 20, 200, 57, 0, 15, 100, 100, 100, 100, 0, 20),
-(1860, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(1860, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(1860, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
 (1860, 56247, 0,    0, 0,    0, 0, 0, 20,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0);
 
 -- Pet 1863 - warlock succubus
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 1863;
 INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
-(1863, 0, 0, 910, 0, 1150, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 20, 200, 57, 0, 15, 100, 100, 100, 100, 0, 20),
-(1863, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(1863, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(1863, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0);
+(1863, 0, 0, 910, 0, 1150, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 20, 200, 57, 0, 15, 100, 100, 100, 100, 0, 20);
 
 -- Pet 17252 - warlock felguard
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 17252;
 INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
 (17252,     0, 0, 1100, 0, 1150, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 20, 200, 57, 0, 15, 100, 100, 100, 100, 0, 20),
-(17252, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(17252, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
-(17252, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
 (17252, 56246, 0,    0, 0,    0, 0, 0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0, 20, 0,  0,   0,   0,   0,   0, 0,  0);
 
 
@@ -1056,7 +1041,29 @@ UPDATE `creature_template` SET `spell1` = 0, `spell2` = 0 WHERE `entry` = 15352;
 UPDATE `creature_template` SET `spell1` = 40133 WHERE `entry` = 15439;
 UPDATE `creature_template` SET `spell1` = 40132 WHERE `entry` = 15430;
 
+-- Fire Elemental & Earth Elemental summon
 DELETE FROM `event_scripts` WHERE `id` IN (14859,14858);
-INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `datalong3`, `datalong4`, `data_flags`, `dataint`, `dataint2`, `dataint3`, `dataint4`, `x`, `y`, `z`, `o`, `comments`) VALUES
-(14858, 1, 15, 33663, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Summon greater Earth elemental'),
-(14859, 1, 15, 32982, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Summon greater Fire  elemental');
+INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES
+(14858, 1, 15, 33663, 1, 0, 0, 0, 0, 0),
+(14859, 1, 15, 32982, 1, 0, 0, 0, 0, 0);
+
+
+-- for warlock's talent Fel Vitality
+-- But seems this implementation is wrong. It should be implemented through "Tamed Pet Passive" auras
+DELETE FROM `pet_scaling_data` WHERE `aura` IN (18731,18743,18744);
+INSERT INTO `pet_scaling_data` VALUES
+(416, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(416, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(416, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(417, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(417, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(417, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(1860, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(1860, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(1860, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(1863, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(1863, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(1863, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(17252, 18731, 0,    0, 0,    0, 0, 0, 5,  5, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(17252, 18743, 0,    0, 0,    0, 0, 0, 10,  10, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0),
+(17252, 18744, 0,    0, 0,    0, 0, 0, 15,  15, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0, 0,  0,   0,   0,   0,   0, 0,  0);
