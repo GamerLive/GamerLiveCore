@@ -1917,7 +1917,6 @@ void Guardian::AddScalingAction(ScalingTarget target, uint32 stat, bool apply)
 
 void ApplyScalingBonusWithHelper::operator() (Unit* unit) const
 {
-    //if (!unit || !unit->isPet())
     if (!unit || !unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
         return;
 
