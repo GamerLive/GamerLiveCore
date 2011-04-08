@@ -235,6 +235,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL))); // cast can't be helped here
     SetCreatorGUID(owner->GetGUID());
 
+    if (!is_temporary_summoned)
+        _LoadSpells();
+
     InitStatsForLevel(petlevel);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
 
@@ -302,7 +305,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     {
         m_charmInfo->LoadPetActionBar(fields[13].GetString());
 
-        _LoadSpells();
         InitTalentForLevel();                               // re-init to check talent count
         _LoadSpellCooldowns();
         LearnPetPassives();
