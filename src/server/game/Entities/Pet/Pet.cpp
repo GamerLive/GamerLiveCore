@@ -893,7 +893,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         // Armor
         createResistance[SPELL_SCHOOL_NORMAL] = int32(cinfo->ModArmor  * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
 
-        for (int i = 0; i < MAX_STATS; ++i)
+        for (uint8 i = 0; i < MAX_STATS; ++i)
             createStats[i] *= petlevel/10;
 
         createStats[MAX_STATS]    = int32(cinfo->ModHealth * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
@@ -913,7 +913,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
         SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
 
-        for (int i = 0; i < MAX_STATS+7; ++i)
+        for (uint8 i = 0; i < MAX_STATS+7; ++i)
             createStats[i] *= petlevel/10;
         // Armor
         createResistance[SPELL_SCHOOL_NORMAL] = petlevel*50;
@@ -968,7 +968,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         else
             SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE,  float(createResistance[SPELL_SCHOOL_NORMAL]));
 
-        for( int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        for(uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
             if (pInfo->stats[i])
                SetCreateStat(Stats(i), float(pInfo->stats[i]));
             else
@@ -997,8 +997,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     else                                            // not exist in DB, use some default fake data
     {
         sLog->outDebug(LOG_FILTER_PETS, "Summoned pet (Entry: %u) not have pet stats data in DB. Use hardcoded values.",cinfo->Entry);
-        for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-            SetCreateStat(Stats(i),float(createStats[i]));
+        for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+            SetCreateStat(Stats(i), float(createStats[i]));
 
         SetCreateHealth(createStats[MAX_STATS]);
         SetCreateMana(createStats[MAX_STATS+1]);
