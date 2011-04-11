@@ -966,7 +966,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         if (pInfo->armor)
             SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
         else
-            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE,  float(createResistance[SPELL_SCHOOL_NORMAL]));
+            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(createResistance[SPELL_SCHOOL_NORMAL]));
 
         for(uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
             if (pInfo->stats[i])
@@ -989,8 +989,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         else
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(createStats[MAX_STATS+4]));
 
-        SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,float(createStats[MAX_STATS+5]));
-        SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,float(createStats[MAX_STATS+6]));
+        SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, float(createStats[MAX_STATS+5]));
+        SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(createStats[MAX_STATS+6]));
 
         sLog->outDebug(LOG_FILTER_PETS, "Pet %u stats for level initialized (from pet_levelstat values)", cinfo->Entry);
     }
@@ -1002,7 +1002,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
         SetCreateHealth(createStats[MAX_STATS]);
         SetCreateMana(createStats[MAX_STATS+1]);
-        SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE,  float(createResistance[SPELL_SCHOOL_NORMAL]));
+        SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(createResistance[SPELL_SCHOOL_NORMAL]));
 
         SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(createStats[MAX_STATS+2]));
 
