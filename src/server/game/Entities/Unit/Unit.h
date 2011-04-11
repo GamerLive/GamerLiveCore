@@ -1599,8 +1599,6 @@ class Unit : public WorldObject
 
         template<typename Func>
         void CallForAllGuardians(Func const& func);
-        template<typename Func>
-        bool CheckAllControlledUnits(Func const& func, uint32 controlledMask) const;
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
         CharmInfo* InitCharmInfo();
