@@ -115,7 +115,7 @@ class Guardian : public Minion
         void ApplyScalingBonus(ScalingAction* action);
         void ApplyAllScalingBonuses(bool apply);
         void ApplyStatScalingBonus(Stats stat, bool apply);
-        void ApplyResistanceScalingBonus(uint32 school, bool apply);
+        void ApplyResistanceScalingBonus(uint8 school, bool apply);
         void ApplyAttackPowerScalingBonus(bool apply);
         void ApplyDamageScalingBonus(bool apply);
         void ApplySpellDamageScalingBonus(bool apply);

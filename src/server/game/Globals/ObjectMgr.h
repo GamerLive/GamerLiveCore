@@ -418,29 +418,29 @@ struct PetScalingData
     APBasepoint(0), APBaseScale(0), attackpowerScale(0), damageScale(0), spelldamageScale(0), spellHitScale(0),
     meleeHitScale(0), expertizeScale(0), attackspeedScale(0), critScale(0), powerregenScale(0)
     {
-        for(int i=0; i < MAX_STATS; ++i ) statScale[i] = 0;
-        for(int i=0; i < MAX_SPELL_SCHOOL; ++i ) resistanceScale[i] = 0;
+        for(uint8 i = 0; i < MAX_STATS; ++i) statScale[i] = 0;
+        for(uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i) resistanceScale[i] = 0;
     }
 
-    uint32 creatureID;
-    uint32 requiredAura;
-    int32  healthBasepoint;
-    int32  healthScale;
-    int32  powerBasepoint;
-    int32  powerScale;
-    int32  APBasepoint;
-    int32  APBaseScale;
-    int32  statScale[MAX_STATS];
-    int32  resistanceScale[MAX_SPELL_SCHOOL];
-    int32  attackpowerScale;
-    int32  damageScale;
-    int32  spelldamageScale;
-    int32  spellHitScale;
-    int32  meleeHitScale;
-    int32  expertizeScale;
-    int32  attackspeedScale;
-    int32  critScale;
-    int32  powerregenScale;
+    uint32  creatureID;
+    uint32  requiredAura;
+    uint16  healthBasepoint;
+    uint16  healthScale;
+    uint16  powerBasepoint;
+    uint16  powerScale;
+    uint16  APBasepoint;
+    uint16  APBaseScale;
+    uint16  statScale[MAX_STATS];
+    uint16  resistanceScale[MAX_SPELL_SCHOOL];
+    uint16  attackpowerScale;
+    uint16  damageScale;
+    uint16  spelldamageScale;
+    uint16  spellHitScale;
+    uint16  meleeHitScale;
+    uint16  expertizeScale;
+    uint16  attackspeedScale;
+    uint16  critScale;
+    uint16  powerregenScale;
 };
 
 typedef std::vector<PetScalingData> PetScalingDataList;

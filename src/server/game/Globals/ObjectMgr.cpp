@@ -2919,10 +2919,8 @@ void ObjectMgr::LoadPetLevelInfo()
         pLevelInfo->maxdmg = fields[11].GetUInt32();
         pLevelInfo->attackpower = fields[12].GetUInt32();
 
-        for (int i = 0; i < MAX_STATS; i++)
-        {
+        for (uint8 i = 0; i < MAX_STATS; i++)
             pLevelInfo->stats[i] = fields[i+4].GetUInt16();
-        }
 
         ++count;
     }
@@ -3080,29 +3078,25 @@ void ObjectMgr::LoadPetScalingData()
 
         pScalingDataEntry.creatureID = fields[0].GetUInt32();
         pScalingDataEntry.requiredAura = fields[1].GetUInt32();
-        pScalingDataEntry.healthBasepoint = fields[2].GetInt32();
-        pScalingDataEntry.healthScale = fields[3].GetInt32();
-        pScalingDataEntry.powerBasepoint = fields[4].GetInt32();
-        pScalingDataEntry.powerScale = fields[5].GetInt32();
-        for (int i = 0; i < MAX_STATS; i++)
-        {
-            pScalingDataEntry.statScale[i] = fields[i+6].GetInt32();
-        }
-        for (int i = 0; i < MAX_SPELL_SCHOOL; i++)
-        {
-            pScalingDataEntry.resistanceScale[i] = fields[i+11].GetInt32();
-        }
-        pScalingDataEntry.APBasepoint = fields[18].GetInt32();
-        pScalingDataEntry.APBaseScale = fields[19].GetInt32();
-        pScalingDataEntry.attackpowerScale = fields[20].GetInt32();
-        pScalingDataEntry.damageScale = fields[21].GetInt32();
-        pScalingDataEntry.spelldamageScale = fields[22].GetInt32();
-        pScalingDataEntry.spellHitScale = fields[23].GetInt32();
-        pScalingDataEntry.meleeHitScale = fields[24].GetInt32();
-        pScalingDataEntry.expertizeScale = fields[25].GetInt32();
-        pScalingDataEntry.attackspeedScale = fields[26].GetInt32();
-        pScalingDataEntry.critScale = fields[27].GetInt32();
-        pScalingDataEntry.powerregenScale = fields[28].GetInt32();
+        pScalingDataEntry.healthBasepoint = fields[2].GetUInt16();
+        pScalingDataEntry.healthScale = fields[3].GetUInt16();
+        pScalingDataEntry.powerBasepoint = fields[4].GetUInt16();
+        pScalingDataEntry.powerScale = fields[5].GetUInt16();
+        for (uint8 i = 0; i < MAX_STATS; ++i)
+            pScalingDataEntry.statScale[i] = fields[i+6].GetUInt16();
+        for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
+            pScalingDataEntry.resistanceScale[i] = fields[i+11].GetUInt16();
+        pScalingDataEntry.APBasepoint = fields[18].GetUInt16();
+        pScalingDataEntry.APBaseScale = fields[19].GetUInt16();
+        pScalingDataEntry.attackpowerScale = fields[20].GetUInt16();
+        pScalingDataEntry.damageScale = fields[21].GetUInt16();
+        pScalingDataEntry.spelldamageScale = fields[22].GetUInt16();
+        pScalingDataEntry.spellHitScale = fields[23].GetUInt16();
+        pScalingDataEntry.meleeHitScale = fields[24].GetUInt16();
+        pScalingDataEntry.expertizeScale = fields[25].GetUInt16();
+        pScalingDataEntry.attackspeedScale = fields[26].GetUInt16();
+        pScalingDataEntry.critScale = fields[27].GetUInt16();
+        pScalingDataEntry.powerregenScale = fields[28].GetUInt16();
 
         pScalingDataList->push_back(pScalingDataEntry);
 

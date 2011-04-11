@@ -1211,7 +1211,7 @@ void Guardian::ApplyStatScalingBonus(Stats stat, bool apply)
         UpdateStats(stat);
 }
 
-void Guardian::ApplyResistanceScalingBonus(uint32 school, bool apply)
+void Guardian::ApplyResistanceScalingBonus(uint8 school, bool apply)
 {
     if(school < SPELL_SCHOOL_NORMAL || school > SPELL_SCHOOL_ARCANE)
         return;
@@ -1272,11 +1272,12 @@ void Guardian::ApplyResistanceScalingBonus(uint32 school, bool apply)
 void Guardian::ApplyAttackPowerScalingBonus(bool apply)
 {
     Unit* owner = GetOwner();
-    Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
+
+    Unit* pet = ToUnit();
 
     int32 newAPBonus = 0;
 
@@ -1404,11 +1405,12 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
     // SpellPower for pets exactly same DamageBonus.
     //    m_baseBonusData->damageScale
     Unit* owner = GetOwner();
-    Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
+
+    Unit* pet = ToUnit();
 
     int32 newDamageBonus = 0;
 
@@ -1495,11 +1497,12 @@ void Guardian::ApplyDamageScalingBonus(bool apply)
 void Guardian::ApplySpellDamageScalingBonus(bool apply)
 {
     Unit* owner = GetOwner();
-    Unit* pet = ToUnit();
 
     // Don't apply scaling bonuses if no owner or owner is not player
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
         return;
+
+    Unit* pet = ToUnit();
 
     int32 newDamageBonus = 0;
 
@@ -1615,13 +1618,12 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
         UpdateSpellPower();
 }
 
-
 void Guardian::ApplyAllScalingBonuses(bool apply)
 {
-    for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         ApplyStatScalingBonus(Stats(i),apply);
 
-    for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
+    for (uint8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         ApplyResistanceScalingBonus(SpellSchools(i), apply);
 
     ApplyAttackPowerScalingBonus(apply);
@@ -1858,14 +1860,10 @@ PetScalingData* Guardian::CalculateScalingData(bool recalculate)
              m_PetScalingData->attackspeedScale += pData->attackspeedScale;
              m_PetScalingData->critScale        += pData->critScale;
              m_PetScalingData->powerregenScale  += pData->powerregenScale;
-             for (int i = 0; i < MAX_STATS; i++)
-             {
+             for (uint8 i = 0; i < MAX_STATS; ++i)
                   m_PetScalingData->statScale[i] += pData->statScale[i];
-             }
-             for (int i = 0; i < MAX_SPELL_SCHOOL; i++)
-             {
+             for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
                   m_PetScalingData->resistanceScale[i] += pData->resistanceScale[i];
-             }
          }
     }
     return m_PetScalingData;
@@ -1982,10 +1980,11 @@ float Guardian::OCTRegenMPPerSpirit()
 void Guardian::CastPetPassiveAuras(bool current)
 {
     Unit* owner = GetOwner();
-    Unit* pet = ToUnit();
 
-    if(!owner || owner->GetTypeId()!=TYPEID_PLAYER)
+    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
+
+    Unit* pet = ToUnit();
 
     // Cast pet passive aura (if not casted as passive)
     uint32 creature_id = 0;
