@@ -1562,8 +1562,6 @@ void Guardian::ApplySpellDamageScalingBonus(bool apply)
                 newDamageBonus = owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW);
                 break;
             case CLASS_DEATH_KNIGHT:
-                newDamageBonus = owner->GetTotalAttackPowerValue(BASE_ATTACK);
-                break;
             case CLASS_SHAMAN:
                 newDamageBonus = owner->GetTotalAttackPowerValue(BASE_ATTACK);
                 break;

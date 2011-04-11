@@ -868,7 +868,6 @@ INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`
 (17252,     0, 0, 1100, 0, 1150, 0, 0, 75, 30, 0, 35, 40, 40, 40, 40, 40, 40, 20, 200, 57, 0, 15, 100, 100, 100, 100, 0, 20),
 (17252, 56246, 0,    0, 0,    0, 0, 0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,   0, 20, 0,  0,   0,   0,   0,   0, 0,  0);
 
-
 -- Pet 37994 - Mage water elemental
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 37994;
 INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
@@ -877,7 +876,7 @@ INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`
 -- Pet 19668 - Priest  Shadowfiend
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 19668;
 INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
-(19668, 0, 0, 1000, 0, 1500, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 200, 400, 0, 67, 100, 100, 100, 100, 0, 0);
+(19668, 0, 0, 1000, 0, 1500, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 200, 400, 30, 0, 100, 100, 100, 100, 0, 0);
 
 -- Guardian 31216 - mage Mirror image
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 31216;
@@ -1033,3 +1032,17 @@ INSERT INTO `spell_pet_auras` VALUES
 -- Need correct spellcasting for this!
 -- UPDATE `creature_template` SET `spell1` = 12470, `spell2` = 57984 WHERE `entry` = 15438;
 -- UPDATE `creature_template` SET `spell1` = 36213 WHERE `entry` = 15352;
+
+
+/* WARNING! THESE VALUES IS VERY APPROXIMATE. WE NEED MORE INFO ABOUT THESE PETS */
+/* TODO: fix stamina scale for these pets and add some data to `pet_level_stats` table for them */
+
+-- Force of Nature
+DELETE FROM `spell_pet_auras` WHERE `spell` = 0 AND `pet` = 1964;
+INSERT INTO `spell_pet_auras` VALUES
+(0,0,1964,34947);
+
+-- Pet 1964 - Druid  Force of Nature
+DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 1964;
+INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
+(1964, 0, 0, 1000, 0, 1500, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 200, 400, 15, 15, 100, 100, 100, 100, 0, 0);
