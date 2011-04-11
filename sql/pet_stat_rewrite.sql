@@ -1045,4 +1045,4 @@ INSERT INTO `spell_pet_auras` VALUES
 -- Pet 1964 - Druid  Force of Nature
 DELETE FROM `pet_scaling_data` WHERE `creature_entry` = 1964;
 INSERT INTO `pet_scaling_data` (`creature_entry`, `aura`, `healthbase`, `health`, `powerbase`, `power`, `str`, `agi`, `sta`, `inte`, `spi`, `armor`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `apbase`, `apbasescale`, `attackpower`, `damage`, `spelldamage`, `spellhit`, `hit`, `expertize`, `attackspeed`, `crit`, `regen`) VALUES
-(1964, 0, 0, 1000, 0, 1500, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 200, 400, 15, 15, 100, 100, 100, 100, 0, 0);
+(1964, 0, 0, 1000, 0, 1500, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 200, 400, 15, 0, 100, 100, 100, 100, 0, 0);
