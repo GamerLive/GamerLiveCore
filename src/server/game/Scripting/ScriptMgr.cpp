@@ -135,7 +135,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 }
 
 ScriptMgr::ScriptMgr()
-    : _scriptCount(0)
+    : _scriptCount(0), _scheduledScripts(0)
 {
 }
 
@@ -643,7 +643,7 @@ bool ScriptMgr::OnItemUse(Player* player, Item* item, SpellCastTargets const& ta
     return tmpscript->OnUse(player, item, targets);
 }
 
-bool ScriptMgr::OnItemExpire(Player* player, ItemPrototype const* proto)
+bool ScriptMgr::OnItemExpire(Player* player, ItemTemplate const* proto)
 {
     ASSERT(player);
     ASSERT(proto);

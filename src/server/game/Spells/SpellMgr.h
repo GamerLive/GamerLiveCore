@@ -27,7 +27,6 @@
 #include "SpellAuraDefines.h"
 #include "DBCStructure.h"
 #include "DBCStores.h"
-#include "SQLStorage.h"
 
 #include "UnorderedMap.h"
 
@@ -1382,7 +1381,7 @@ class SpellMgr
             SpellRequiredMap::const_iterator itr = mSpellReq.find(spell_id);
 
             if (itr == mSpellReq.end())
-                return NULL;
+                return 0;
 
             return itr->second;
         }

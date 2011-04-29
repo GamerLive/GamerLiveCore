@@ -29,7 +29,7 @@
 #include "DatabaseEnv.h"
 #include "World.h"
 
-struct ItemPrototype;
+struct ItemTemplate;
 struct AuctionEntry;
 struct DeclinedName;
 struct MovementInfo;
@@ -47,7 +47,6 @@ class LoginQueryHolder;
 class CharacterHandler;
 class SpellCastTargets;
 struct AreaTableEntry;
-struct GM_Ticket;
 struct LfgJoinResultData;
 struct LfgLockStatus;
 struct LfgPlayerBoot;
@@ -425,8 +424,6 @@ class WorldSession
         void HandleGMTicketDeleteOpcode(WorldPacket& recvPacket);
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
-        void SendGMTicketGetTicket(uint32 status, char const* text, GM_Ticket *ticket = NULL);
-        void SendGMTicketResponse(GM_Ticket *ticket);
         void HandleGMSurveySubmit(WorldPacket& recvPacket);
         void HandleReportLag(WorldPacket& recvPacket);
         void HandleGMResponseResolve(WorldPacket& recvPacket);
@@ -603,7 +600,7 @@ class WorldSession
         void HandleQueryNextMailTime(WorldPacket & recv_data);
         void HandleCancelChanneling(WorldPacket & recv_data);
 
-        void SendItemPageInfo(ItemPrototype *itemProto);
+        void SendItemPageInfo(ItemTemplate *itemProto);
         void HandleSplitItemOpcode(WorldPacket& recvPacket);
         void HandleSwapInvItemOpcode(WorldPacket& recvPacket);
         void HandleDestroyItemOpcode(WorldPacket& recvPacket);

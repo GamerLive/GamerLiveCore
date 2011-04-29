@@ -120,7 +120,7 @@ bool OPvPCapturePoint::SetCapturePointData(uint32 entry, uint32 map, float x, fl
     sLog->outDebug(LOG_FILTER_OUTDOORPVP, "Creating capture point %u", entry);
 
     // check info existence
-    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
     if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
     {
         sLog->outError("OutdoorPvP: GO %u is not capture point!", entry);
@@ -166,7 +166,10 @@ bool OPvPCapturePoint::DelCreature(uint32 type)
     //if (Map * map = sMapMgr->FindMap(cr->GetMapId()))
     //    map->Remove(cr,false);
     // delete respawn time for this creature
-    CharacterDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u'", guid);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CREATURE_RESPAWN_BY_GUID);
+    stmt->setUInt32(0, guid);
+    CharacterDatabase.Execute(stmt);
+
     cr->AddObjectToRemoveList();
     sObjectMgr->DeleteCreatureData(guid);
     m_CreatureTypes[m_Creatures[type]] = 0;

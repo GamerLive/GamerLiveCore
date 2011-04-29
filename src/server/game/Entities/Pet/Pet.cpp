@@ -158,7 +158,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     PetType pet_type = PetType(fields[18].GetUInt8());
     if (pet_type == HUNTER_PET)
     {
-        CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);
+        CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(petentry);
         if (!creatureInfo || !creatureInfo->isTameable(owner->CanTameExoticPets()))
             return false;
     }
@@ -191,7 +191,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     setFaction(owner->getFaction());
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
 
-    CreatureInfo const *cinfo = GetCreatureInfo();
+    CreatureTemplate const *cinfo = GetCreatureInfo();
     if (cinfo->type == CREATURE_TYPE_CRITTER)
     {
         map->Add(this->ToCreature());
@@ -779,7 +779,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         return false;
     }
 
-    CreatureInfo const *cinfo = GetCreatureInfo();
+    CreatureTemplate const *cinfo = GetCreatureInfo();
     if (!cinfo)
     {
         sLog->outError("CreateBaseAtCreature() failed, creatureInfo is missing!");
@@ -796,7 +796,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     return true;
 }
 
-bool Pet::CreateBaseAtCreatureInfo(CreatureInfo const* cinfo, Unit * owner)
+bool Pet::CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit * owner)
 {
     if (!CreateBaseAtTamed(cinfo, owner->GetMap(), owner->GetPhaseMask()))
         return false;
@@ -809,7 +809,7 @@ bool Pet::CreateBaseAtCreatureInfo(CreatureInfo const* cinfo, Unit * owner)
     return true;
 }
 
-bool Pet::CreateBaseAtTamed(CreatureInfo const * cinfo, Map * map, uint32 phaseMask)
+bool Pet::CreateBaseAtTamed(CreatureTemplate const * cinfo, Map * map, uint32 phaseMask)
 {
     sLog->outDebug(LOG_FILTER_PETS, "Pet::CreateBaseForTamed");
     uint32 guid=sObjectMgr->GenerateLowGuid(HIGHGUID_PET);
@@ -838,7 +838,7 @@ bool Pet::CreateBaseAtTamed(CreatureInfo const * cinfo, Map * map, uint32 phaseM
 // TODO: Move stat mods code to pet passive auras
 bool Guardian::InitStatsForLevel(uint8 petlevel)
 {
-    CreatureInfo const *cinfo = GetCreatureInfo();
+    CreatureTemplate const *cinfo = GetCreatureInfo();
     ASSERT(cinfo);
 
     SetLevel(petlevel);
@@ -881,15 +881,15 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                                        3};     // Base MaxRangeDamage
 
     //resistance
-    uint32 createResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
-    if(cinfo)
+    int32 createResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
+    if (cinfo)
     {
-        createResistance[SPELL_SCHOOL_HOLY]   = cinfo->resistance1;
-        createResistance[SPELL_SCHOOL_FIRE]   = cinfo->resistance2;
-        createResistance[SPELL_SCHOOL_NATURE] = cinfo->resistance3;
-        createResistance[SPELL_SCHOOL_FROST]  = cinfo->resistance4;
-        createResistance[SPELL_SCHOOL_SHADOW] = cinfo->resistance5;
-        createResistance[SPELL_SCHOOL_ARCANE] = cinfo->resistance6;
+        createResistance[SPELL_SCHOOL_HOLY]   = cinfo->resistance[SPELL_SCHOOL_HOLY];
+        createResistance[SPELL_SCHOOL_FIRE]   = cinfo->resistance[SPELL_SCHOOL_FIRE];
+        createResistance[SPELL_SCHOOL_NATURE] = cinfo->resistance[SPELL_SCHOOL_NATURE];
+        createResistance[SPELL_SCHOOL_FROST]  = cinfo->resistance[SPELL_SCHOOL_FROST];
+        createResistance[SPELL_SCHOOL_SHADOW] = cinfo->resistance[SPELL_SCHOOL_SHADOW];
+        createResistance[SPELL_SCHOOL_ARCANE] = cinfo->resistance[SPELL_SCHOOL_ARCANE];
         // Armor
         createResistance[SPELL_SCHOOL_NORMAL] = int32(cinfo->ModArmor  * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
 
@@ -1038,12 +1038,12 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     return true;
 }
 
-bool Pet::HaveInDiet(ItemPrototype const* item) const
+bool Pet::HaveInDiet(ItemTemplate const* item) const
 {
     if (!item->FoodType)
         return false;
 
-    CreatureInfo const* cInfo = GetCreatureInfo();
+    CreatureTemplate const* cInfo = GetCreatureInfo();
     if (!cInfo)
         return false;
 
@@ -1280,8 +1280,8 @@ void Pet::_SaveAuras(SQLTransaction& trans)
             }
             else
             {
-                baseDamage[i] = NULL;
-                damage[i] = NULL;
+                baseDamage[i] = 0;
+                damage[i] = 0;
             }
         }
 
@@ -1570,7 +1570,7 @@ bool Pet::resetTalents(bool no_cost)
     if (owner->ToPlayer()->HasAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS))
         owner->ToPlayer()->RemoveAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS,true);
 
-    CreatureInfo const * ci = GetCreatureInfo();
+    CreatureTemplate const * ci = GetCreatureInfo();
     if (!ci)
         return false;
     // Check pet talent type
@@ -1875,7 +1875,7 @@ bool Pet::HasSpell(uint32 spell) const
 // Get all passive spells in our skill line
 void Pet::LearnPetPassives()
 {
-    CreatureInfo const* cInfo = GetCreatureInfo();
+    CreatureTemplate const* cInfo = GetCreatureInfo();
     if (!cInfo)
         return;
 

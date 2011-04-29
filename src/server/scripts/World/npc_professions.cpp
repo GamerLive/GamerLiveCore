@@ -233,10 +233,10 @@ bool EquippedOk(Player* pPlayer, uint32 spellId)
         {
             pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, j);
             if (pItem)
-                if (pItem->GetProto()->RequiredSpell == reqSpell)
+                if (pItem->GetTemplate()->RequiredSpell == reqSpell)
             {
                 //player has item equipped that require specialty. Not allow to unlearn, player has to unequip first
-                sLog->outDebug(LOG_FILTER_TSCR, "TSCR: player attempt to unlearn spell %u, but item %u is equipped.",reqSpell,pItem->GetProto()->ItemId);
+                sLog->outDebug(LOG_FILTER_TSCR, "TSCR: player attempt to unlearn spell %u, but item %u is equipped.",reqSpell,pItem->GetTemplate()->ItemId);
                 return false;
             }
         }
@@ -832,9 +832,6 @@ enum eEngineeringTrinkets
     SPELL_TO_GADGET             = 23489,
     SPELL_TO_AREA52             = 36954,
     SPELL_TO_TOSHLEY            = 36955,
-
-    ITEM_GNOMISH_CARD           = 10790,
-    ITEM_GOBLIN_CARD            = 10791
 };
 
 #define GOSSIP_ITEM_ZAP         "[PH] Unknown"
@@ -913,10 +910,7 @@ public:
         }
 
         if (CanLearn)
-        {
-            if (pPlayer->HasItemCount(ITEM_GOBLIN_CARD,1) || pPlayer->HasItemCount(ITEM_GNOMISH_CARD,1))
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GossipItem, pCreature->GetEntry(), GOSSIP_ACTION_INFO_DEF+1);
-        }
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GossipItem, pCreature->GetEntry(), GOSSIP_ACTION_INFO_DEF+1);
 
         pPlayer->SEND_GOSSIP_MENU(NpcTextId ? NpcTextId : pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
         return true;

@@ -714,13 +714,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         Item *item = m_caster->ToPlayer()->GetWeaponForAttack(RANGED_ATTACK);
                         if (item)
                         {
-                            float dmg_min = item->GetProto()->Damage->DamageMin;
-                            float dmg_max = item->GetProto()->Damage->DamageMax;
+                            float dmg_min = item->GetTemplate()->Damage->DamageMin;
+                            float dmg_max = item->GetTemplate()->Damage->DamageMax;
                             if (dmg_max == 0.0f && dmg_min > dmg_max)
                                 damage += int32(dmg_min);
                             else
                                 damage += irand(int32(dmg_min), int32(dmg_max));
-                            damage += int32(m_caster->ToPlayer()->GetAmmoDPS()*item->GetProto()->Delay*0.001f);
+                            damage += int32(m_caster->ToPlayer()->GetAmmoDPS()*item->GetTemplate()->Delay*0.001f);
                         }
                     }
                 }
@@ -2377,7 +2377,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
     Player* player = (Player*)unitTarget;
 
     uint32 newitemid = itemtype;
-    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(newitemid);
+    ItemTemplate const *pProto = sObjectMgr->GetItemTemplate(newitemid);
     if (!pProto)
     {
         player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
@@ -2458,7 +2458,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
         }
 
         // set the "Crafted by ..." property of the item
-        if (pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE && pItem->GetProto()->Class != ITEM_CLASS_QUEST && newitemid != 6265 && newitemid != 6948)
+        if (pItem->GetTemplate()->Class != ITEM_CLASS_CONSUMABLE && pItem->GetTemplate()->Class != ITEM_CLASS_QUEST && newitemid != 6265 && newitemid != 6948)
             pItem->SetUInt32Value(ITEM_FIELD_CREATOR, player->GetGUIDLow());
 
         // send info to the client
@@ -2541,15 +2541,16 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
         // Caster not in world, might be spell triggered from aura removal
         if (!caster->IsInWorld())
             return;
-        DynamicObject* dynObj = new DynamicObject;
-        if (!dynObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo->Id, m_targets.m_dstPos, radius, false))
+        DynamicObject* dynObj = new DynamicObject();
+        if (!dynObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo->Id, m_targets.m_dstPos, radius, false, DYNAMIC_OBJECT_AREA_SPELL))
         {
             delete dynObj;
             return;
         }
+
         dynObj->GetMap()->Add(dynObj);
 
-        if (Aura * aura = Aura::TryCreate(m_spellInfo, dynObj, caster, &m_spellValue->EffectBasePoints[0]))
+        if (Aura* aura = Aura::TryCreate(m_spellInfo, dynObj, caster, &m_spellValue->EffectBasePoints[0]))
         {
             m_spellAura = aura;
             m_spellAura->_RegisterForTargets();
@@ -2557,6 +2558,7 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
         else
             return;
     }
+
     ASSERT(m_spellAura->GetDynobjOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
 }
@@ -2771,7 +2773,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     // Get lockId
     if (gameObjTarget)
     {
-        GameObjectInfo const* goInfo = gameObjTarget->GetGOInfo();
+        GameObjectTemplate const* goInfo = gameObjTarget->GetGOInfo();
         // Arathi Basin banner opening !
         if ((goInfo->type == GAMEOBJECT_TYPE_BUTTON && goInfo->button.noDamageImmune) ||
             (goInfo->type == GAMEOBJECT_TYPE_GOOBER && goInfo->goober.losOK))
@@ -2809,7 +2811,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     }
     else if (itemTarget)
     {
-        lockId = itemTarget->GetProto()->LockID;
+        lockId = itemTarget->GetTemplate()->LockID;
         guid = itemTarget->GetGUID();
     }
     else
@@ -2998,29 +3000,13 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
     Position pos;
     GetSummonPosition(effIndex, pos);
 
-    /*//totem must be at same Z in case swimming caster and etc.
-        if (fabs(z - m_caster->GetPositionZ()) > 5)
-            z = m_caster->GetPositionZ();
-
-    uint8 level = m_caster->getLevel();
-
-    // level of creature summoned using engineering item based at engineering skill level
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
-    {
-        ItemPrototype const *proto = m_CastItem->GetProto();
-        if (proto && proto->RequiredSkill == SKILL_ENGINERING)
-        {
-            uint16 skill202 = m_caster->ToPlayer()->GetSkillValue(SKILL_ENGINERING);
-            if (skill202)
-                level = skill202/5;
-        }
-    }*/
-
     TempSummon *summon = NULL;
 
     switch (properties->Category)
     {
-        default:
+        case SUMMON_CATEGORY_WILD:
+        case SUMMON_CATEGORY_ALLY:
+        case SUMMON_CATEGORY_UNK:
             if (properties->Flags & 512)
             {
                 SummonGuardian(effIndex, entry, properties);
@@ -3034,6 +3020,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 case SUMMON_TYPE_MINION:
                     SummonGuardian(effIndex, entry, properties);
                     break;
+                // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
                 case SUMMON_TYPE_VEHICLE:
                 case SUMMON_TYPE_VEHICLE2:
                     if (m_originalCaster)
@@ -3050,8 +3037,6 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         summon->SetMaxHealth(damage);
                         summon->SetHealth(damage);
                     }
-
-                    //summon->SetUInt32Value(UNIT_CREATED_BY_SPELL,m_spellInfo->Id);
 
                     if (m_originalCaster->GetTypeId() == TYPEID_PLAYER
                         && properties->Slot >= SUMMON_SLOT_TOTEM
@@ -3096,24 +3081,27 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
 
                     uint32 amount = damage > 0 ? damage : 1;
-                    if (m_spellInfo->Id == 18662) // Curse of Doom
+                    if (m_spellInfo->Id == 18662 || // Curse of Doom
+                        properties->Id == 2081)     // Mechanical Dragonling, Arcanite Dragonling, Mithril Dragonling TODO: Research on meaning of basepoints
                         amount = 1;
+
+                    TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
 
                     for (uint32 count = 0; count < amount; ++count)
                     {
                         GetSummonPosition(effIndex, pos, radius, count);
 
-                        TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
-
                         summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
                         if (!summon)
                             continue;
+
                         if (properties->Category == SUMMON_CATEGORY_ALLY)
                         {
                             summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_originalCaster->GetGUID());
                             summon->setFaction(m_originalCaster->getFaction());
                             summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
                         }
+
                         ExecuteLogEffectSummonObject(effIndex, summon);
                     }
                     return;
@@ -3127,34 +3115,28 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
             summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
             break;
         case SUMMON_CATEGORY_VEHICLE:
-        {
+            // Summoning spells (usually triggered by npc_spellclick) that spawn a vehicle and that cause the clicker
+            // to cast a ride vehicle spell on the summoned unit.
             float x, y, z;
             m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
             summon = m_originalCaster->GetMap()->SummonCreature(entry, pos, properties, duration, m_caster);
             if (!summon || !summon->IsVehicle())
                 return;
 
-            if (m_spellInfo->EffectBasePoints[effIndex])
-            {
-                SpellEntry const *spellProto = sSpellStore.LookupEntry(SpellMgr::CalculateSpellEffectAmount(m_spellInfo, effIndex));
-                if (spellProto)
-                {
-                    m_originalCaster->CastSpell(summon, spellProto, true);
-                    return;
-                }
-            }
+            // The spell that this effect will trigger. It has SPELL_AURA_CONTROL_VEHICLE
+            uint32 spell = VEHICLE_SPELL_RIDE_HARDCODED;
+            if (SpellEntry const* spellProto = sSpellStore.LookupEntry(SpellMgr::CalculateSpellEffectAmount(m_spellInfo, effIndex)))
+                spell = spellProto->Id;
 
             // Hard coded enter vehicle spell
-            m_originalCaster->CastSpell(summon, VEHICLE_SPELL_RIDE_HARDCODED, true);
+            m_originalCaster->CastSpell(summon, spell, true);
 
-            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
             uint32 faction = properties->Faction;
             if (!faction)
                 faction = m_originalCaster->getFaction();
 
             summon->setFaction(faction);
             break;
-        }
     }
 
     if (summon)
@@ -3382,14 +3364,15 @@ void Spell::EffectAddFarsight(SpellEffIndex effIndex)
     // Caster not in world, might be spell triggered from aura removal
     if (!m_caster->IsInWorld())
         return;
-    DynamicObject* dynObj = new DynamicObject;
-    if (!dynObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, m_targets.m_dstPos, radius, true))
+
+    DynamicObject* dynObj = new DynamicObject();
+    if (!dynObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, m_targets.m_dstPos, radius, true, DYNAMIC_OBJECT_FARSIGHT_FOCUS))
     {
         delete dynObj;
         return;
     }
+
     dynObj->SetDuration(duration);
-    dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x80000002);
 
     dynObj->setActive(true);    //must before add to map to be put in world container
     dynObj->GetMap()->Add(dynObj); //grid will also be loaded
@@ -3495,7 +3478,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
     else
     {
         // do not increase skill if vellum used
-        if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_PROTO_FLAG_TRIGGERED_CAST))
+        if (!(m_CastItem && m_CastItem->GetTemplate()->Flags & ITEM_PROTO_FLAG_TRIGGERED_CAST))
             p_caster->UpdateCraftSkill(m_spellInfo->Id);
 
         uint32 enchant_id = m_spellInfo->EffectMiscValue[effIndex];
@@ -3515,7 +3498,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
         {
             sLog->outCommand(p_caster->GetSession()->GetAccountId(),"GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
                 p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
-                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+                itemTarget->GetTemplate()->Name1,itemTarget->GetEntry(),
                 item_owner->GetName(),item_owner->GetSession()->GetAccountId());
         }
 
@@ -3576,7 +3559,7 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
     {
         sLog->outCommand(p_caster->GetSession()->GetAccountId(),"GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
             p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
-            itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+            itemTarget->GetTemplate()->Name1,itemTarget->GetEntry(),
             item_owner->GetName(),item_owner->GetSession()->GetAccountId());
     }
 
@@ -3706,7 +3689,7 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
     {
         sLog->outCommand(p_caster->GetSession()->GetAccountId(),"GM %s (Account: %u) enchanting(temp): %s (Entry: %d) for player: %s (Account: %u)",
             p_caster->GetName(), p_caster->GetSession()->GetAccountId(),
-            itemTarget->GetProto()->Name1, itemTarget->GetEntry(),
+            itemTarget->GetTemplate()->Name1, itemTarget->GetEntry(),
             item_owner->GetName(), item_owner->GetSession()->GetAccountId());
     }
 
@@ -4004,7 +3987,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 // 50% more damage with daggers
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
-                        if (item->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
+                        if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
                             totalDamagePercentMod *= 1.5f;
             }
             // Mutilate (for each hand)
@@ -4402,52 +4385,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     return;
                 }
                 case 45204: // Clone Me!
-                case 45785: // Sinister Reflection Clone
-                case 49889: // Mystery of the Infinite: Future You's Mirror Image Aura
-                case 50218: // The Cleansing: Your Inner Turmoil's Mirror Image Aura
-                case 51719: // Altar of Quetz'lun: Material You's Mirror Image Aura
-                case 57528: // Nightmare Figment Mirror Image
-                case 69828: // Halls of Reflection Clone
                     m_caster->CastSpell(unitTarget, damage, true);
-                    break;
-                case 41055: // Copy Weapon
-                case 63416:
-                case 69891:
-                    m_caster->CastSpell(unitTarget, damage, true);
-                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-                        break;
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if (Item * mainItem = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-                            unitTarget->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, mainItem->GetEntry());
-                    }
-                    else
-                        unitTarget->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID));
-                    break;
-                case 45206: // Copy Off-hand Weapon
-                case 69892:
-                    m_caster->CastSpell(unitTarget, damage, true);
-                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-                        break;
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if (Item * offItem = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-                            unitTarget->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, offItem->GetEntry());
-                    }
-                    else
-                        unitTarget->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1));
-                    break;
-                case 57593: // Copy Ranged Weapon
-                    m_caster->CastSpell(unitTarget, damage, true);
-                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-                        break;
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if (Item * rangedItem = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-                            unitTarget->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, rangedItem->GetEntry());
-                    }
-                    else
-                        unitTarget->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2));
                     break;
                 case 55693:                                 // Remove Collapsing Cave Aura
                     if (!unitTarget)
@@ -5759,7 +5697,7 @@ void Spell::EffectDisEnchant(SpellEffIndex /*effIndex*/)
         return;
 
     Player* p_caster = (Player*)m_caster;
-    if (!itemTarget || !itemTarget->GetProto()->DisenchantID)
+    if (!itemTarget || !itemTarget->GetTemplate()->DisenchantID)
         return;
 
     p_caster->UpdateCraftSkill(m_spellInfo->Id);
@@ -5802,7 +5740,7 @@ void Spell::EffectFeedPet(SpellEffIndex effIndex)
     if (!pet->isAlive())
         return;
 
-    int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetProto()->ItemLevel);
+    int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetTemplate()->ItemLevel);
     if (benefit <= 0)
         return;
 
@@ -6402,7 +6340,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
 {
     uint32 name_id = m_spellInfo->EffectMiscValue[effIndex];
 
-    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(name_id);
+    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(name_id);
 
     if (!goinfo)
     {
@@ -6546,7 +6484,7 @@ void Spell::EffectProspecting(SpellEffIndex /*effIndex*/)
         return;
 
     Player* p_caster = (Player*)m_caster;
-    if (!itemTarget || !(itemTarget->GetProto()->Flags & ITEM_PROTO_FLAG_PROSPECTABLE))
+    if (!itemTarget || !(itemTarget->GetTemplate()->Flags & ITEM_PROTO_FLAG_PROSPECTABLE))
         return;
 
     if (itemTarget->GetCount() < 5)
@@ -6555,7 +6493,7 @@ void Spell::EffectProspecting(SpellEffIndex /*effIndex*/)
     if (sWorld->getBoolConfig(CONFIG_SKILL_PROSPECTING))
     {
         uint32 SkillValue = p_caster->GetPureSkillValue(SKILL_JEWELCRAFTING);
-        uint32 reqSkillValue = itemTarget->GetProto()->RequiredSkillRank;
+        uint32 reqSkillValue = itemTarget->GetTemplate()->RequiredSkillRank;
         p_caster->UpdateGatherSkill(SKILL_JEWELCRAFTING, SkillValue, reqSkillValue);
     }
 
@@ -6568,7 +6506,7 @@ void Spell::EffectMilling(SpellEffIndex /*effIndex*/)
         return;
 
     Player* p_caster = (Player*)m_caster;
-    if (!itemTarget || !(itemTarget->GetProto()->Flags & ITEM_PROTO_FLAG_MILLABLE))
+    if (!itemTarget || !(itemTarget->GetTemplate()->Flags & ITEM_PROTO_FLAG_MILLABLE))
         return;
 
     if (itemTarget->GetCount() < 5)
@@ -6577,7 +6515,7 @@ void Spell::EffectMilling(SpellEffIndex /*effIndex*/)
     if (sWorld->getBoolConfig(CONFIG_SKILL_MILLING))
     {
         uint32 SkillValue = p_caster->GetPureSkillValue(SKILL_INSCRIPTION);
-        uint32 reqSkillValue = itemTarget->GetProto()->RequiredSkillRank;
+        uint32 reqSkillValue = itemTarget->GetTemplate()->RequiredSkillRank;
         p_caster->UpdateGatherSkill(SKILL_INSCRIPTION, SkillValue, reqSkillValue);
     }
 
@@ -6936,7 +6874,7 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
 
     // level of pet summoned using engineering item based at engineering skill level
     if (m_CastItem && caster->GetTypeId() == TYPEID_PLAYER)
-        if (ItemPrototype const *proto = m_CastItem->GetProto())
+        if (ItemTemplate const *proto = m_CastItem->GetTemplate())
             if (proto->RequiredSkill == SKILL_ENGINERING)
                 if (uint16 skill202 = caster->ToPlayer()->GetSkillValue(SKILL_ENGINERING))
                     level = skill202/5;
@@ -6971,6 +6909,9 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
             return;
         if (summon->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
             ((Guardian*)summon)->InitStatsForLevel(level);
+
+        if (properties && properties->Category == SUMMON_CATEGORY_ALLY)
+            summon->setFaction(caster->getFaction());
 
         summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
         if (summon->HasUnitTypeMask(UNIT_MASK_MINION) && m_targets.HasDst())
@@ -7154,7 +7095,7 @@ void Spell::EffectRechargeManaGem(SpellEffIndex /*effIndex*/)
 
     uint32 item_id = m_spellInfo->EffectItemType[0];
 
-    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(item_id);
+    ItemTemplate const *pProto = sObjectMgr->GetItemTemplate(item_id);
     if (!pProto)
     {
         player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);

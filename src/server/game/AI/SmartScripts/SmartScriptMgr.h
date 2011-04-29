@@ -151,8 +151,9 @@ enum SMART_EVENT
     SMART_EVENT_GOSSIP_HELLO             = 64,      //1             // none
     SMART_EVENT_FOLLOW_COMPLETED         = 65,      //1             // none
     SMART_EVENT_DUMMY_EFFECT             = 66,      //1             // spellId, effectIndex
+    SMART_EVENT_IS_BEHIND_TARGET         = 67,      //1             // cooldownMin, CooldownMax
 
-    SMART_EVENT_END                      = 67,
+    SMART_EVENT_END                      = 68,
 };
 
 struct SmartEvent
@@ -330,6 +331,12 @@ struct SmartEvent
             uint32 spell;
             uint32 effIndex;
         } dummy;
+
+        struct
+        {
+            uint32 cooldownMin;
+            uint32 cooldownMax;
+        } behindTarget;
 
         struct
         {
@@ -1094,8 +1101,9 @@ const uint32 SmartAIEventMask[SMART_EVENT_END][2] =
     {SMART_EVENT_GOSSIP_SELECT,             SMART_SCRIPT_TYPE_MASK_CREATURE + SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
     {SMART_EVENT_JUST_CREATED,              SMART_SCRIPT_TYPE_MASK_CREATURE + SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
     {SMART_EVENT_GOSSIP_HELLO,              SMART_SCRIPT_TYPE_MASK_CREATURE + SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
-    {SMART_EVENT_FOLLOW_COMPLETED,           SMART_SCRIPT_TYPE_MASK_CREATURE },
+    {SMART_EVENT_FOLLOW_COMPLETED,          SMART_SCRIPT_TYPE_MASK_CREATURE },
     {SMART_EVENT_DUMMY_EFFECT,              SMART_SCRIPT_TYPE_MASK_CREATURE },
+    {SMART_EVENT_IS_BEHIND_TARGET,          SMART_SCRIPT_TYPE_MASK_CREATURE }
 
 };
 
@@ -1256,7 +1264,7 @@ class SmartAIMgr
         }
         inline bool IsCreatureValid(SmartScriptHolder e, uint32 entry)
         {
-            if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
+            if (!sObjectMgr->GetCreatureTemplate(entry))
             {
                 sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Creature entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), entry);
                 return false;
@@ -1274,7 +1282,7 @@ class SmartAIMgr
         }
         inline bool IsGameObjectValid(SmartScriptHolder e, uint32 entry)
         {
-            if (!sGOStorage.LookupEntry<GameObjectInfo>(uint32(entry)))
+            if (!sObjectMgr->GetGameObjectTemplate(entry))
             {
                 sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent GameObject entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), entry);
                 return false;

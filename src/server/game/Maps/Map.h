@@ -216,14 +216,9 @@ struct CreatureMover
 
 struct InstanceTemplate
 {
-    uint32 map;
-    uint32 parent;
-    float startLocX;
-    float startLocY;
-    float startLocZ;
-    float startLocO;
-    uint32 script_id;
-    bool allowMount;
+    uint32 Parent;
+    uint32 ScriptId;
+    bool AllowMount;
 };
 
 enum LevelRequirementVsMode
@@ -533,7 +528,9 @@ class Map : public GridRefManager<NGridType>
         std::set<WorldObject *> i_objectsToRemove;
         std::map<WorldObject*, bool> i_objectsToSwitch;
         std::set<WorldObject*> i_worldObjects;
-        std::multimap<time_t, ScriptAction> m_scriptSchedule;
+
+        typedef std::multimap<time_t, ScriptAction> ScriptScheduleMap;
+        ScriptScheduleMap m_scriptSchedule;
 
         // Type specific code for add/remove to/from grid
         template<class T>
