@@ -2132,20 +2132,18 @@ void OPvPCapturePointWG::ChangeTeam(TeamId oldTeam)
         }
         if (m_spiGuid)
         {
+            *m_spiEntry = guide_entry;
+            _RespawnCreatureIfNeeded(m_spiritguide, guide_entry);
             if (m_wintergrasp->getAttackerTeam() == TEAM_ALLIANCE)
             {
-                *m_spiEntry = guide_entry;
                 _RespawnCreatureIfNeeded(m_spiritguide_horde, guide_entry_fortress_horde);
                 m_wintergrasp->RelocateHordeDeadPlayers(m_spiritguide_horde); // Horde
-                _RespawnCreatureIfNeeded(m_spiritguide, guide_entry);
                 m_wintergrasp->RelocateAllianceDeadPlayers(m_spiritguide); // Alliance
             }
             else
             {
-                *m_spiEntry = guide_entry;
                 _RespawnCreatureIfNeeded(m_spiritguide_alliance, guide_entry_fortress_alliance);
                 m_wintergrasp->RelocateAllianceDeadPlayers(m_spiritguide_alliance); // Alliance
-                _RespawnCreatureIfNeeded(m_spiritguide, guide_entry);
                 m_wintergrasp->RelocateHordeDeadPlayers(m_spiritguide); // Horde
             }
         }
