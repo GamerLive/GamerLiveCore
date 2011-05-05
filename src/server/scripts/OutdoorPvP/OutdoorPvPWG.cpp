@@ -1053,7 +1053,8 @@ bool OutdoorPvPWG::UpdateCreatureInfo(Creature *creature)
         case CREATURE_GUARD:
         case CREATURE_SPECIAL:
         {
-            if (creature->GetAreaId() == 4575 && (creature->GetEntry() == 30740 || creature->GetEntry() == 30739))
+            // uncomment this code or delete duplicate spawns of guards in keep if using YTDB
+            /*if (creature->GetAreaId() == 4575 && (creature->GetEntry() == 30740 || creature->GetEntry() == 30739))
             {
                 switch (entry)
                 {
@@ -1080,7 +1081,7 @@ bool OutdoorPvPWG::UpdateCreatureInfo(Creature *creature)
                 creature->AI()->EnterEvadeMode();
                 return false;
             }
-            else
+            else*/
             {
                 TeamPairMap::const_iterator itr = m_creEntryPair.find(creature->GetCreatureData()->id);
                 if (itr != m_creEntryPair.end())
