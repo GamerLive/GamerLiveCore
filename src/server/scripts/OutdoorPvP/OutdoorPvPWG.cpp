@@ -1827,10 +1827,7 @@ void OutdoorPvPWG::EndBattle()
                         honor = baseHonor;
                     }
                     else
-                    {
                         marks = 1;
-                        honor = 0;
-                    }
                 }
                 else
                 {
@@ -1838,11 +1835,6 @@ void OutdoorPvPWG::EndBattle()
                     {
                         marks = 1;
                         honor = baseHonor;
-                    }
-                    else
-                    {
-                        marks = 0;
-                        honor = 0;
                     }
                 }
                 plr->RewardHonor(NULL, 1, honor);
@@ -1888,7 +1880,7 @@ void OutdoorPvPWG::EndBattle()
     sWorld->SendWintergraspState();
     // update go factions
     for (GameObjectSet::iterator itr = m_gobjects.begin(); itr != m_gobjects.end(); ++itr)
-       UpdateGameObjectInfo(*itr);
+        UpdateGameObjectInfo(*itr);
 }
 
 bool OutdoorPvPWG::CanBuildVehicle(OPvPCapturePointWG *workshop) const
