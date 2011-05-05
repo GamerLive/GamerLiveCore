@@ -61,7 +61,7 @@ enum Spells
     SPELL_DECIMATE                          = 71123,
 };
 
-#define MUTATED_INFECTION RAID_MODE<int32>(69674,71224,73022,73023)
+#define MUTATED_INFECTION RAID_MODE<int32>(69674, 71224, 73022, 73023)
 
 enum Events
 {
@@ -434,6 +434,7 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
             {
                 if (!GetHitUnit())
                     return;
+
                 std::list<Creature*> list;
                 GetHitUnit()->GetCreatureListWithEntryInGrid(list, GetHitUnit()->GetEntry(), 12.5f);
                 list.sort(Trinity::ObjectDistanceOrderPred(GetHitUnit()));
@@ -444,7 +445,11 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
             {
                 // get 2 targets except 2 nearest
                 targetList.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
-                targetList.resize(4);
+
+                // .resize() runs pop_back();
+                if (targetList.size() > 4)
+                    targetList.resize(4);
+
                 while (targetList.size() > 2)
                     targetList.pop_front();
             }

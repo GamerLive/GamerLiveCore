@@ -1416,9 +1416,9 @@ DROP TABLE IF EXISTS `creature_equip_template`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_equip_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Unique entry',
-  `equipentry1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `equipentry2` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `equipentry3` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `itemEntry1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `itemEntry2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `itemEntry3` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Equipment)';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2846,11 +2846,7 @@ DROP TABLE IF EXISTS `instance_template`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `instance_template` (
   `map` smallint(5) unsigned NOT NULL,
-  `parent` int(10) unsigned NOT NULL,
-  `startLocX` float DEFAULT NULL,
-  `startLocY` float DEFAULT NULL,
-  `startLocZ` float DEFAULT NULL,
-  `startLocO` float DEFAULT NULL,
+  `parent` smallint(5) unsigned NOT NULL,
   `script` varchar(128) NOT NULL DEFAULT '',
   `allowMount` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`map`)
@@ -16956,6 +16952,7 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (2948, 0.4286, -1, -1, -1, 'Mage - Scorch'),
 (59638, 0.3, -1, 0, -1, 'Mage - Mirror Image Frostbolt'),
 (59637, 0.15, -1, 0, -1, 'Mage - Mirror Image Fire Blast'),
+(31707, 0.8333, 0, 0, 0, 'Mage - Water Elemental Waterbolt'),
 (31935, 0.07, -1, 0.07, -1, 'Paladin - Avenger Shield'),
 (53742, -1, 0.0176, -1, 0.03, 'Paladin - Blood Corruption'),
 (26573, -1, 0.04, -1, 0.04, 'Paladin - Consecration'),
@@ -17329,7 +17326,8 @@ INSERT INTO `spell_dbc` (`Id`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`A
 (65195,  0, 0, 536870912, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 16, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'The Iron Council credit marker'),
 (64899,  0, 0, 536870912, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 16, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Hodir credit marker'),
 (64985,  0, 0, 536870912, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 16, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Thorim credit marker'),
-(65074,  0, 0, 536870912, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 16, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Freya credit marker');
+(65074,  0, 0, 536870912, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 16, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Freya credit marker'),
+(60937,  0, 0, 562036736, 32, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Seaforium charges damaging wall achievement credit');
 /*!40000 ALTER TABLE `spell_dbc` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -17688,7 +17686,6 @@ INSERT INTO `spell_group` (`id`, `spell_id`) VALUES
 (1046,57660), -- Totem of Wrath
 (1046,57662), -- Totem of Wrath
 (1046,57663), -- Totem of Wrath
-(1046,30708), -- Totem of Wrath
 (1047,53646), -- Demonic Pact
 -- Increased Spell Hit Chance Taken Debuff
 (1049,33600), --  Improved Faerie Fire
@@ -18098,6 +18095,8 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment
 ( 20066,-61840, 0, 'Repentance'),
 ( 66235, 66233, 0, 'Ardent Defender Visuals'),
 ( 58875, 58876, 1, 'Spirit Walk'),
+(-47960,-63311, 0, 'Glyph of Shadowflame Rank 1'),
+(-61291,-63311, 0, 'Glyph of Shadowflame Rank 2'),
 -- Misc
 ( 55428, 55475, 0, 'Lifeblood (Rank 1)'),
 ( 55480, 55475, 0, 'Lifeblood (Rank 2)'),
@@ -18105,6 +18104,8 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment
 ( 55501, 55475, 0, 'Lifeblood (Rank 4)'),
 ( 55502, 55475, 0, 'Lifeblood (Rank 5)'),
 ( 55503, 55475, 0, 'Lifeblood (Rank 6)'),
+( 61716, 61719, 2, 'Rabbit Costume: Lay Egg periodic'),
+( 61734, 61719, 2, 'Noblegarden Bunny: Lay Egg periodic'),
 -- Quest
 ( 26286, 44430, 0, 'Small Red Rocket - questcredit'),
 ( 26292, 44430, 0, 'Small Green Rocket - questcredit'),
@@ -18740,7 +18741,7 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 33297, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,  45), -- Spell Haste Trinket
 ( 33299, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Coilfang Slave Pens Lvl 70 Boss3a Caster Trinket
 ( 33510, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   5,   0,   0), -- Health Restore
-( 33648, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Reflection of Torment
+( 33648, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,  45), -- Reflection of Torment
 ( 33719, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000800,   0,   0,   0), -- Perfect Spell Reflection
 ( 33736, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   3), -- Water Shield (Rank 8)
 ( 33746, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,  10), -- Essence Infused Mushroom

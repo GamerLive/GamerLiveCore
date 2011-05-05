@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include <ace/Singleton.h>
+#include <ace/Atomic_Op.h>
 
 #include "DBCStores.h"
 #include "Player.h"
@@ -62,7 +63,7 @@ class WorldObject;
 struct AchievementCriteriaData;
 struct AuctionEntry;
 struct Condition;
-struct ItemPrototype;
+struct ItemTemplate;
 struct OutdoorPvPData;
 
 #define VISIBLE_RANGE       (166.0f)                        //MAX visible range (size of grid)
@@ -388,7 +389,7 @@ class ItemScript : public ScriptObject
         virtual bool OnUse(Player* /*player*/, Item* /*item*/, SpellCastTargets const& /*targets*/) { return false; }
 
         // Called when the item expires (is destroyed).
-        virtual bool OnExpire(Player* /*player*/, ItemPrototype const* /*proto*/) { return false; }
+        virtual bool OnExpire(Player* /*player*/, ItemTemplate const* /*proto*/) { return false; }
 };
 
 class CreatureScript : public ScriptObject, public UpdatableScript<Creature>
@@ -766,6 +767,9 @@ class ScriptMgr
 
     uint32 _scriptCount;
 
+    //atomic op counter for active scripts amount
+    ACE_Atomic_Op<ACE_Thread_Mutex, long> _scheduledScripts;
+
     public: /* Initialization */
 
         void Initialize();
@@ -836,7 +840,7 @@ class ScriptMgr
         bool OnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex, Item* target);
         bool OnQuestAccept(Player* player, Item* item, Quest const* quest);
         bool OnItemUse(Player* player, Item* item, SpellCastTargets const& targets);
-        bool OnItemExpire(Player* player, ItemPrototype const* proto);
+        bool OnItemExpire(Player* player, ItemTemplate const* proto);
 
     public: /* CreatureScript */
 
@@ -970,6 +974,12 @@ class ScriptMgr
         void OnGroupRemoveMember(Group* group, uint64 guid, RemoveMethod method, uint64 kicker, const char* reason);
         void OnGroupChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid);
         void OnGroupDisband(Group* group);
+
+    public: /* Scheduled scripts */
+        uint32 IncreaseScheduledScriptsCount() { return uint32(++_scheduledScripts); }
+        uint32 DecreaseScheduledScriptCount() { return uint32(--_scheduledScripts); }
+        uint32 DecreaseScheduledScriptCount(size_t count) { return uint32(_scheduledScripts -= count); }
+        bool IsScriptScheduled() const { return _scheduledScripts > 0; }
 
     public: /* ScriptRegistry */
 
