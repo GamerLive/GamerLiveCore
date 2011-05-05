@@ -151,3 +151,9 @@ UPDATE `creature_template` SET `ScriptName`='npc_wg_ally_battle_mage' WHERE `ent
 UPDATE `creature_template` SET `ScriptName`='npc_wg_horde_battle_mage' WHERE `entry`=32170;
 
 UPDATE `gameobject_template` SET `type` = 6, `faction` = 0, `data2` = 10, `data3` = 54643, `ScriptName` = 'go_wg_veh_teleporter' WHERE `entry` = 192951;
+
+/* Uncomment queries below if you are using TDB */
+-- can't find better way to find him
+-- also spawn coords are very approximate
+/*DELETE FROM `creature` WHERE `id` = 31841 AND `spawntimesecs` = 300;
+INSERT INTO `creature` VALUES ('',31841,571,1,1,0,413,5536.95,2908.74,517.055,4.83334,300,0,0,126000,7988,0,0,0,0,0);*/
