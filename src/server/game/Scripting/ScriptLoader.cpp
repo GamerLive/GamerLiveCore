@@ -58,6 +58,7 @@ void AddSC_quest_commandscript();
 void AddSC_reload_commandscript();
 void AddSC_tele_commandscript();
 void AddSC_titles_commandscript();
+void AddSC_wg_commandscript();
 void AddSC_wp_commandscript();
 
 #ifdef SCRIPTS
@@ -652,6 +653,7 @@ void AddCommandScripts()
     AddSC_reload_commandscript();
     AddSC_tele_commandscript();
     AddSC_titles_commandscript();
+    AddSC_wg_commandscript();
     AddSC_wp_commandscript();
 }
 
