@@ -588,10 +588,10 @@ void OutdoorPvPWG::ProcessEvent(GameObject *obj, uint32 eventId)
                     }
                     break;
                 case BUILDING_TOWER:
-                     --m_towerDamagedCount[state->GetTeam()];
-                     ++m_towerDestroyedCount[state->GetTeam()];
-                     if (state->GetTeam() == getAttackerTeam())
-                     {
+                    --m_towerDamagedCount[state->GetTeam()];
+                    ++m_towerDestroyedCount[state->GetTeam()];
+                    if (state->GetTeam() == getAttackerTeam())
+                    {
                         TeamCastSpell(getAttackerTeam(), -SPELL_TOWER_CONTROL);
                         TeamCastSpell(getDefenderTeam(), -SPELL_TOWER_CONTROL);
                         uint8 attStack = 3 - m_towerDestroyedCount[getAttackerTeam()];
@@ -1721,7 +1721,7 @@ void OutdoorPvPWG::EndBattle()
         (*itr)->PlayDirectSound(TeamIDsound); // SoundOnEndWin
     }
     for (PlayerSet::iterator itr = m_players[getAttackerTeam()].begin(); itr != m_players[getAttackerTeam()].end(); ++itr)
-        (*itr)->PlayDirectSound(OutdoorPvP_WG_SOUND_NEAR_VICTORY) ; // SoundOnEndLoose
+        (*itr)->PlayDirectSound(OutdoorPvP_WG_SOUND_NEAR_VICTORY); // SoundOnEndLoose
     for (uint8 team = 0; team < 2; ++team)
     {
         // destroyed all vehicles
