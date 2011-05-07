@@ -4380,20 +4380,25 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 //Teleport to Lake Wintergrasp
                 case 58622:
                 {
-                  if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
-                     if (unitTarget->getLevel() > 74)
-                     {
-                       if ((pvpWG->getDefenderTeam()==TEAM_ALLIANCE) && (unitTarget->ToPlayer()->GetTeam() == ALLIANCE))
-                          unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_FORTRESS, true);
-                       else if ((pvpWG->getDefenderTeam()==TEAM_ALLIANCE) && (unitTarget->ToPlayer()->GetTeam() == HORDE))
-                          unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_HORDE_CAMP, true);
-
-                       if ((pvpWG->getDefenderTeam()!=TEAM_ALLIANCE) && (unitTarget->ToPlayer()->GetTeam() == HORDE))
-                          unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_FORTRESS, true);
-                       else if ((pvpWG->getDefenderTeam()!=TEAM_ALLIANCE) && (unitTarget->ToPlayer()->GetTeam() == ALLIANCE))
-                          unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_ALLIENCE_CAMP, true);
-                     }
-                return;
+                    if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+                        if (unitTarget->getLevel() > 74)
+                        {
+                            if (pvpWG->getDefenderTeam() == TEAM_ALLIANCE)
+                            {
+                                if (unitTarget->ToPlayer()->GetTeam() == ALLIANCE)
+                                    unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_FORTRESS, true);
+                                else
+                                    unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_HORDE_CAMP, true);
+                            }
+                            else
+                            {
+                                if (unitTarget->ToPlayer()->GetTeam() == HORDE)
+                                    unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_FORTRESS, true);
+                                else
+                                    unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_ALLIANCE_CAMP, true);
+                            }
+                        }
+                    return;
                 }
                 // Glyph of Backstab
                 case 63975:
