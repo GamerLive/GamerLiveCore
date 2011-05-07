@@ -491,6 +491,7 @@ void AddSC_storm_peaks();
 void AddSC_zuldrak();
 void AddSC_crystalsong_forest();
 void AddSC_isle_of_conquest();
+void AddSC_wintergrasp();
 
 //outland
 void AddSC_boss_exarch_maladaar();           //Auchindoun Auchenai Crypts
@@ -584,7 +585,6 @@ void AddSC_outdoorpvp_si();
 void AddSC_outdoorpvp_tf();
 void AddSC_outdoorpvp_zm();
 void AddSC_outdoorpvp_wg();
-void AddSC_wintergrasp();
 
 // player
 void AddSC_chat_log();
