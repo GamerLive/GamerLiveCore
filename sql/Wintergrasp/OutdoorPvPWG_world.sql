@@ -331,9 +331,3 @@ INSERT INTO `gameobject` VALUES
 ('', 192267, 571, 1, 385, 4452.76, 2639.14, 358.444, 1.67552, 0, 0, 0, 1, 300, 255, 1),
 ('', 192449, 571, 1, 385, 4517.75, 2717.23, 387.812, -1.53589, 0, 0, 0, 1, 300, 255, 1),
 ('', 192450, 571, 1, 385, 4387.59, 2719.9, 390.201, -1.51843, 0, 0, 0, 1, 300, 255, 1);
-
-/* Uncomment queries below if you are using TDB */
--- can't find better way to find him
--- also spawn coords are very approximate
-/*DELETE FROM `creature` WHERE `id` = 31841 AND `spawntimesecs` = 300;
-INSERT INTO `creature` VALUES ('',31841,571,1,1,0,413,5536.95,2908.74,517.055,4.83334,300,0,0,126000,7988,0,0,0,0,0);*/
