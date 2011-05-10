@@ -4,7 +4,7 @@ DELETE FROM `creature` WHERE `id` = 31841 AND `spawntimesecs` = 300;
 INSERT INTO `creature` VALUES ('',31841,571,1,1,0,413,5536.95,2908.74,517.055,4.83334,300,0,0,126000,7988,0,0,0,0,0);
 
 -- cannons faction
-UPDATE `creature_template` SET `faction_A` = 1732,`faction_H` = 1801 WHERE `entry` = 28366; #TDB only?
+UPDATE `creature_template` SET `faction_A` = 1732,`faction_H` = 1801 WHERE `entry` = 28366;
 
 -- cannons spawns
 DELETE FROM `creature` WHERE `id` = 28366;
