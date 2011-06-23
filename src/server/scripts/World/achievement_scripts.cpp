@@ -15,28 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+
 #include "BattlegroundAB.h"
 #include "BattlegroundWS.h"
 #include "BattlegroundIC.h"
 #include "BattlegroundSA.h"
-
-class achievement_school_of_hard_knocks : public AchievementCriteriaScript
-{
-    public:
-        achievement_school_of_hard_knocks() : AchievementCriteriaScript("achievement_school_of_hard_knocks") { }
-
-        bool OnCheck(Player* source, Unit* /*target*/)
-        {
-            static uint32 const orphanEntries[6] = {14305, 14444, 22818, 22817, 33533, 33532};
-            uint32 currentPet = GUID_ENPART(source->GetCritterGUID());
-            for (uint8 i = 0; i < 6; ++i)
-                if (currentPet == orphanEntries[i])
-                    return true;
-
-            return false;
-        }
-};
 
 class achievement_storm_glory : public AchievementCriteriaScript
 {
@@ -166,12 +150,12 @@ class achievement_bg_ic_mowed_down : public AchievementCriteriaScript
         }
 };
 
-class achievement_bg_sa_artillery_veteran : public AchievementCriteriaScript
+class achievement_bg_sa_artillery : public AchievementCriteriaScript
 {
     public:
-        achievement_bg_sa_artillery_veteran() : AchievementCriteriaScript("achievement_bg_sa_artillery_veteran") { }
+        achievement_bg_sa_artillery() : AchievementCriteriaScript("achievement_bg_sa_artillery") { }
 
-        bool OnCheck(Player* source, Unit* target)
+        bool OnCheck(Player* source, Unit* /*target*/)
         {
             if (Creature* vehicle = source->GetVehicleCreatureBase())
             {
@@ -183,48 +167,29 @@ class achievement_bg_sa_artillery_veteran : public AchievementCriteriaScript
         }
 };
 
-class achievement_bg_sa_artillery_expert : public AchievementCriteriaScript
+class achievement_arena_kills : public AchievementCriteriaScript
 {
     public:
-        achievement_bg_sa_artillery_expert() : AchievementCriteriaScript("achievement_bg_sa_artillery_expert") { }
-
-        bool OnCheck(Player* source, Unit* target)
+        achievement_arena_kills(char const* name, uint8 arenaType) : AchievementCriteriaScript(name),
+            _arenaType(arenaType)
         {
-            if (Creature* vehicle = source->GetVehicleCreatureBase())
-            {
-                if (vehicle->GetEntry() != NPC_ANTI_PERSONNAL_CANNON)
-                    return false;
-
-                BattlegroundSA* SA = static_cast<BattlegroundSA*>(source->GetBattleground());
-                return SA->GetPlayerDemolisherScore(source);
-            }
-
-            return false;
         }
-};
 
-class achievement_bg_sa_drop_it : public AchievementCriteriaScript
-{
-    public:
-        achievement_bg_sa_drop_it() : AchievementCriteriaScript("achievement_bg_sa_drop_it") { }
-
-        enum AchievementData
+        bool OnCheck(Player* source, Unit* /*target*/)
         {
-            SPELL_CARRYING_SEAFORIUM = 52418,            
-        };
+            // this checks GetBattleground() for NULL already
+            if (!source->InArena())
+                return false;
 
-        bool OnCheck(Player* /*source*/, Unit* target)
-        {
-            if (target->HasAura(SPELL_CARRYING_SEAFORIUM))
-                return true;
-
-            return false;
+            return source->GetBattleground()->GetArenaType() == _arenaType;
         }
+
+    private:
+        uint8 const _arenaType;
 };
 
 void AddSC_achievement_scripts()
 {
-    new achievement_school_of_hard_knocks();
     new achievement_storm_glory();
     new achievement_resilient_victory();
     new achievement_bg_control_all_nodes();
@@ -232,7 +197,8 @@ void AddSC_achievement_scripts()
     new achievement_bg_ic_resource_glut();
     new achievement_bg_ic_glaive_grave();
     new achievement_bg_ic_mowed_down();
-    new achievement_bg_sa_artillery_veteran();
-    new achievement_bg_sa_artillery_expert();
-    new achievement_bg_sa_drop_it();
+    new achievement_bg_sa_artillery();
+    new achievement_arena_kills("achievement_arena_2v2_kills", ARENA_TYPE_2v2);
+    new achievement_arena_kills("achievement_arena_3v3_kills", ARENA_TYPE_3v3);
+    new achievement_arena_kills("achievement_arena_5v5_kills", ARENA_TYPE_5v5);
 }

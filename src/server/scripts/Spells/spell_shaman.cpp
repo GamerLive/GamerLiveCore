@@ -33,7 +33,47 @@ enum ShamanSpells
 
     //For Earthen Power
     SHAMAN_TOTEM_SPELL_EARTHBIND_TOTEM  = 6474, //Spell casted by totem
-    SHAMAN_TOTEM_SPELL_EARTHEN_POWER    = 59566,//Spell witch remove snare effect
+    SHAMAN_TOTEM_SPELL_EARTHEN_POWER    = 59566, //Spell witch remove snare effect
+};
+
+// this a dirty hack
+// TODO: remove me if you will find how to disable this spell for second pet
+class spell_sha_bash : public SpellScriptLoader
+{
+public:
+    spell_sha_bash() : SpellScriptLoader("spell_sha_bash") { }
+
+    class spell_sha_bash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_bash_SpellScript)
+
+        SpellCastResult CheckCooldown()
+        {
+            if (GetCaster())
+                if (Unit * owner = GetCaster()->GetOwner())
+                    if (owner->ToPlayer()->HasSpellCooldown(58861))
+                        return SPELL_FAILED_DONT_REPORT;
+            return SPELL_CAST_OK;
+        }
+
+        void HandleAfterHit()
+        {
+            if (GetCaster())
+                if (Unit * owner = GetCaster()->GetOwner())
+                    owner->ToPlayer()->AddSpellCooldown(58861, 0, time(NULL) + 45);
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_sha_bash_SpellScript::CheckCooldown);
+            AfterHit += SpellHitFn(spell_sha_bash_SpellScript::HandleAfterHit);
+        }
+    };
+
+    SpellScript * GetSpellScript() const
+    {
+        return new spell_sha_bash_SpellScript();
+    }
 };
 
 // 51474 - Astral shift
@@ -54,7 +94,7 @@ public:
             return true;
         }
 
-        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
         {
             // Set absorbtion amount to unlimited
             amount = -1;
@@ -89,7 +129,7 @@ public:
     class spell_sha_fire_nova_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_sha_fire_nova_SpellScript)
-        bool Validate(SpellEntry const * spellEntry)
+        bool Validate(SpellEntry const* spellEntry)
         {
             if (!sSpellStore.LookupEntry(SHAMAN_SPELL_FIRE_NOVA_R1))
                 return false;
@@ -148,7 +188,7 @@ public:
     class spell_sha_mana_tide_totem_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_sha_mana_tide_totem_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SHAMAN_SPELL_GLYPH_OF_MANA_TIDE))
                 return false;
@@ -198,7 +238,7 @@ public:
     {
         PrepareAuraScript(spell_sha_earthbind_totem_AuraScript);
 
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SHAMAN_TOTEM_SPELL_EARTHBIND_TOTEM))
                 return false;
@@ -207,7 +247,7 @@ public:
             return true;
         }
 
-        void HandleEffectPeriodic(AuraEffect const * aurEff)
+        void HandleEffectPeriodic(AuraEffect const* aurEff)
         {
             Unit* target = GetTarget();
             if (Unit *caster = aurEff->GetBase()->GetCaster())
@@ -230,6 +270,7 @@ public:
 
 void AddSC_shaman_spell_scripts()
 {
+    new spell_sha_bash();
     new spell_sha_astral_shift();
     new spell_sha_fire_nova();
     new spell_sha_mana_tide_totem();

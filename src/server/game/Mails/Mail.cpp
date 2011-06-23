@@ -71,7 +71,7 @@ MailReceiver::MailReceiver(Player* receiver) : m_receiver(receiver), m_receiver_
 {
 }
 
-MailReceiver::MailReceiver(Player* receiver,uint32 receiver_lowguid) : m_receiver(receiver), m_receiver_lowguid(receiver_lowguid)
+MailReceiver::MailReceiver(Player* receiver, uint32 receiver_lowguid) : m_receiver(receiver), m_receiver_lowguid(receiver_lowguid)
 {
     ASSERT(!receiver || receiver->GetGUIDLow() == receiver_lowguid);
 }
@@ -96,9 +96,9 @@ void MailDraft::prepareItems(Player* receiver, SQLTransaction& trans)
     uint32 max_slot = mailLoot.GetMaxSlotInLootFor(receiver);
     for (uint32 i = 0; m_items.size() < MAX_MAIL_ITEMS && i < max_slot; ++i)
     {
-        if (LootItem* lootitem = mailLoot.LootItemInSlot(i,receiver))
+        if (LootItem* lootitem = mailLoot.LootItemInSlot(i, receiver))
         {
-            if (Item* item = Item::CreateItem(lootitem->itemid,lootitem->count,receiver))
+            if (Item* item = Item::CreateItem(lootitem->itemid, lootitem->count, receiver))
             {
                 item->SaveToDB(trans);                           // save for prevent lost at next mail load, if send fail then item will deleted
                 AddItem(item);
@@ -126,15 +126,13 @@ void MailDraft::deleteIncludedItems(SQLTransaction& trans, bool inDB /*= false*/
     m_items.clear();
 }
 
-void MailDraft::SendReturnToSender(uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid)
+void MailDraft::SendReturnToSender(uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, SQLTransaction& trans)
 {
-    Player *receiver = sObjectMgr->GetPlayer(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
+    Player* receiver = sObjectMgr->GetPlayer(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
 
     uint32 rc_account = 0;
     if (!receiver)
         rc_account = sObjectMgr->GetPlayerAccountIdByGUID(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
-
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
     if (!receiver && !rc_account)                            // sender not exist
     {
@@ -167,8 +165,7 @@ void MailDraft::SendReturnToSender(uint32 sender_acc, uint32 sender_guid, uint32
     uint32 deliver_delay = needItemDelay ? sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
     // will delete item or place to receiver mail list
-    SendMailTo(trans,MailReceiver(receiver,receiver_guid), MailSender(MAIL_NORMAL, sender_guid), MAIL_CHECK_MASK_RETURNED, deliver_delay);
-    CharacterDatabase.CommitTransaction(trans);
+    SendMailTo(trans, MailReceiver(receiver, receiver_guid), MailSender(MAIL_NORMAL, sender_guid), MAIL_CHECK_MASK_RETURNED, deliver_delay);
 }
 
 void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, MailSender const& sender, MailCheckMask checked, uint32 deliver_delay)
@@ -275,4 +272,64 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, 
         SQLTransaction temp = SQLTransaction(NULL);
         deleteIncludedItems(temp);
     }
+}
+
+void WorldSession::SendExternalMails()
+{
+    sLog->outDetail("EXTERNAL MAIL> Sending mails in queue...");
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_EXTERNAL_MAIL);
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+    if (!result)
+    {
+        sLog->outDetail("EXTERNAL MAIL> No mails in queue...");
+        return;
+    }
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+    MailDraft* mail = NULL;
+
+    do
+    {
+        Field *fields = result->Fetch();
+        uint32 id = fields[0].GetUInt32();
+        uint32 receiver_guid = fields[1].GetUInt32();
+        std::string subject = fields[2].GetString();
+        std::string body = fields[3].GetString();
+        uint32 money = fields[4].GetUInt32();
+        uint32 itemId = fields[5].GetUInt32();
+        uint32 itemCount = fields[6].GetUInt32();
+
+        Player *receiver = sObjectMgr->GetPlayer(receiver_guid);
+
+        mail = new MailDraft(subject, body);
+
+        if (money)
+        {
+            sLog->outDetail("EXTERNAL MAIL> Adding money");
+            mail->AddMoney(money);
+        }
+
+        if (itemId)
+        {
+            sLog->outDetail("EXTERNAL MAIL> Adding %u of item with id %u", itemCount, itemId);
+            Item* mailItem = Item::CreateItem(itemId, itemCount);
+            mailItem->SaveToDB(trans);
+            mail->AddItem(mailItem);
+        }
+
+        mail->SendMailTo(trans, receiver ? receiver : MailReceiver(receiver_guid), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+        delete mail;
+
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXTERNAL_MAIL);
+        stmt->setUInt32(0, id);
+        trans->Append(stmt);
+
+        sLog->outDetail("EXTERNAL MAIL> Mail sent");
+    }
+    while (result->NextRow());
+
+    CharacterDatabase.CommitTransaction(trans);
+    sLog->outDetail("EXTERNAL MAIL> All Mails Sent...");
 }

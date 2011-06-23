@@ -27,40 +27,17 @@
 #include "CreatureAI.h"
 #include "ZoneScript.h"
 
-Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo, uint32 creatureEntry)
-: me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0), m_creatureEntry(creatureEntry)
+Vehicle::Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry) : me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0), m_creatureEntry(creatureEntry)
 {
     for (uint32 i = 0; i < MAX_VEHICLE_SEATS; ++i)
     {
         if (uint32 seatId = m_vehicleInfo->m_seatID[i])
-            if (VehicleSeatEntry const *veSeat = sVehicleSeatStore.LookupEntry(seatId))
+            if (VehicleSeatEntry const* veSeat = sVehicleSeatStore.LookupEntry(seatId))
             {
                 m_Seats.insert(std::make_pair(i, VehicleSeat(veSeat)));
                 if (veSeat->CanEnterOrExit())
                     ++m_usableSeatNum;
             }
-    }
-
-    // HACKY WAY, We must found a more generic way to handle this
-    // Set inmunities since db ones are rewritten with player's ones
-    switch (GetVehicleInfo()->m_ID)
-    {
-        case 160:
-            me->SetControlled(true, UNIT_STAT_ROOT);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
-        case 158:
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_HEAL, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CONFUSE, true);
-            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
-            break;
-        default:
-            break;
     }
 
     InitMovementInfoForBase();
@@ -74,7 +51,7 @@ Vehicle::~Vehicle()
 
 void Vehicle::Install()
 {
-    if (Creature *pCreature = me->ToCreature())
+    if (Creature* creature = me->ToCreature())
     {
         switch (m_vehicleInfo->m_powerType)
         {
@@ -93,15 +70,12 @@ void Vehicle::Install()
             default:
                 for (uint32 i = 0; i < MAX_SPELL_VEHICLE; ++i)
                 {
-                    if (!pCreature->m_spells[i])
+                    if (!creature->m_spells[i])
                         continue;
 
-                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(pCreature->m_spells[i]);
+                    SpellEntry const* spellInfo = sSpellStore.LookupEntry(creature->m_spells[i]);
                     if (!spellInfo)
                         continue;
-
-                    if (spellInfo->powerType == POWER_MANA)
-                        break;
 
                     if (spellInfo->powerType == POWER_ENERGY)
                     {
@@ -118,16 +92,18 @@ void Vehicle::Install()
         sScriptMgr->OnInstall(this);
 }
 
-void Vehicle::InstallAllAccessories()
+void Vehicle::InstallAllAccessories(bool evading)
 {
-    RemoveAllPassengers();   // We might have aura's saved in the DB with now invalid casters - remove
+    if (GetBase()->GetTypeId() == TYPEID_PLAYER || !evading)
+        RemoveAllPassengers();   // We might have aura's saved in the DB with now invalid casters - remove
 
-    VehicleAccessoryList const* mVehicleList = sObjectMgr->GetVehicleAccessoryList(this);
-    if (!mVehicleList)
+    VehicleAccessoryList const* accessories = sObjectMgr->GetVehicleAccessoryList(this);
+    if (!accessories)
         return;
 
-    for (VehicleAccessoryList::const_iterator itr = mVehicleList->begin(); itr != mVehicleList->end(); ++itr)
-        InstallAccessory(itr->uiAccessory, itr->uiSeat, itr->bMinion, itr->uiSummonType, itr->uiSummonTime);
+    for (VehicleAccessoryList::const_iterator itr = accessories->begin(); itr != accessories->end(); ++itr)
+        if (!evading || itr->IsMinion)  // only install minions on evade mode
+            InstallAccessory(itr->AccessoryEntry, itr->SeatId, itr->IsMinion, itr->SummonedType, itr->SummonTime);
 }
 
 void Vehicle::Uninstall()
@@ -139,9 +115,9 @@ void Vehicle::Uninstall()
         sScriptMgr->OnUninstall(this);
 }
 
-void Vehicle::Reset()
+void Vehicle::Reset(bool evading /*= false*/)
 {
-    sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::Reset");
+    sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::Reset Entry: %u, GuidLow: %u", m_creatureEntry, me->GetGUIDLow());
     if (me->GetTypeId() == TYPEID_PLAYER)
     {
         if (m_usableSeatNum)
@@ -149,13 +125,67 @@ void Vehicle::Reset()
     }
     else
     {
-        InstallAllAccessories();
+        ApplyAllImmunities();
+        InstallAllAccessories(evading);
         if (m_usableSeatNum)
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
     }
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnReset(this);
+}
+
+void Vehicle::ApplyAllImmunities()
+{
+    // This couldn't be done in DB, because Vehicle's immunities are overriden by Player's ones
+
+    // Vehicles should be immune on Knockback, Deathgrip ...
+    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+
+    // ... Fear, Snare, Root, Stun ...
+    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FEAR, true);
+    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
+    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
+    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
+    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DISORIENTED, true);
+    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CONFUSE, true);
+
+    // Mechanical units & vehicles ( which are not Bosses, they have own immunities in DB ) should be also immune on healing ( exceptions in switch below )
+    if (me->ToCreature() && me->ToCreature()->GetCreatureInfo()->type == CREATURE_TYPE_MECHANICAL && !me->ToCreature()->isWorldBoss())
+    {
+        // Heal & dispel ...
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_HEAL, true);
+
+        // ... Shield & Immunity grant spells ...
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SCHOOL_IMMUNITY, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_UNATTACKABLE, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SCHOOL_ABSORB, true);
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SHIELD, true);
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_IMMUNE_SHIELD , true);
+
+        // ... Resistance, Split damage, Speed Increase, ...
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_DAMAGE_SHIELD, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SPLIT_DAMAGE_PCT, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_RESISTANCE, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STAT, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_INCREASE_SPEED, true);
+    }
+
+    // Different immunities for vehicles goes below
+    switch (GetVehicleInfo()->m_ID)
+    {
+        case 160:
+            me->SetControlled(true, UNIT_STAT_ROOT);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
+            break;
+        default:
+            break;
+    }
 }
 
 void Vehicle::RemoveAllPassengers()
@@ -169,9 +199,9 @@ void Vehicle::RemoveAllPassengers()
 
     // Following the above logic, this assertion should NEVER fail.
     // Even in 'hacky' cases, there should at least be VEHICLE_SPELL_RIDE_HARDCODED on us.
-    SeatMap::const_iterator itr;
-    for (itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
-        ASSERT(!itr->second.passenger);
+    // SeatMap::const_iterator itr;
+    // for (itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
+    //    ASSERT(!itr->second.passenger);
 }
 
 bool Vehicle::HasEmptySeat(int8 seatId) const
@@ -182,7 +212,7 @@ bool Vehicle::HasEmptySeat(int8 seatId) const
     return !seat->second.passenger;
 }
 
-Unit *Vehicle::GetPassenger(int8 seatId) const
+Unit* Vehicle::GetPassenger(int8 seatId) const
 {
     SeatMap::const_iterator seat = m_Seats.find(seatId);
     if (seat == m_Seats.end())
@@ -222,7 +252,7 @@ int8 Vehicle::GetNextEmptySeat(int8 seatId, bool next) const
 void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion, uint8 type, uint32 summonTime)
 {
     sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle: Installing accessory entry %u on vehicle entry %u (seat:%i)", entry, GetCreatureEntry(), seatId);
-    if (Unit *passenger = GetPassenger(seatId))
+    if (Unit* passenger = GetPassenger(seatId))
     {
         // already installed
         if (passenger->GetEntry() == entry)
@@ -239,22 +269,24 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion, uint8 typ
             passenger->ExitVehicle(); // this should not happen
     }
 
-    if (Creature *accessory = me->SummonCreature(entry, *me, TempSummonType(type), summonTime))
+    if (TempSummon* accessory = me->SummonCreature(entry, *me, TempSummonType(type), summonTime))
     {
         if (minion)
             accessory->AddUnitTypeMask(UNIT_MASK_ACCESSORY);
 
         if (!me->HandleSpellClick(accessory, seatId))
         {
-            accessory->AddObjectToRemoveList();
+            accessory->UnSummon();
             return;
         }
 
-        if (!accessory->IsOnVehicle(me))
-        {
-            accessory->AddObjectToRemoveList();
-            return;         // Something went wrong in the spellsystem
-        }
+        // this cannot be checked instantly like this
+        // spellsystem is delaying everything to next update tick
+        //if (!accessory->IsOnVehicle(me))
+        //{
+        //    accessory->UnSummon();
+        //    return;         // Something went wrong in the spellsystem
+        //}
 
         // This is not good, we have to send update twice
         accessory->SendMovementFlagUpdate();
@@ -264,7 +296,7 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion, uint8 typ
     }
 }
 
-bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
+bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
 {
     if (unit->GetVehicle() != this)
         return false;
@@ -290,7 +322,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
             if (Unit* passenger = ObjectAccessor::GetUnit(*GetBase(), seat->second.passenger))
                 passenger->ExitVehicle();
             else
-                seat->second.passenger = NULL;
+                seat->second.passenger = 0;
         }
 
         ASSERT(!seat->second.passenger);
@@ -316,7 +348,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
         unit->AddUnitState(UNIT_STAT_ONVEHICLE);
 
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
-    VehicleSeatEntry const *veSeat = seat->second.seatInfo;
+    VehicleSeatEntry const* veSeat = seat->second.seatInfo;
     unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
     unit->m_movementInfo.t_pos.m_positionY = veSeat->m_attachmentOffsetY;
     unit->m_movementInfo.t_pos.m_positionZ = veSeat->m_attachmentOffsetZ;
@@ -332,10 +364,10 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
             ASSERT(false);
 
         // hack: should be done by aura system
-        if (VehicleScalingInfo const *scalingInfo = sObjectMgr->GetVehicleScalingInfo(m_vehicleInfo->m_ID))
+        if (VehicleScalingInfo const* scalingInfo = sObjectMgr->GetVehicleScalingInfo(m_vehicleInfo->m_ID))
         {
-            Player *plr = unit->ToPlayer();
-            float averageItemLevel = plr->GetAverageItemLevel();
+            Player* player = unit->ToPlayer();
+            float averageItemLevel = player->GetAverageItemLevel();
             if (averageItemLevel < scalingInfo->baseItemLevel)
                 averageItemLevel = scalingInfo->baseItemLevel;
             averageItemLevel -= scalingInfo->baseItemLevel;
@@ -346,6 +378,10 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
             me->SetHealth(uint32((me->GetHealth() + m_bonusHP) * currentHealthPct));
         }
     }
+
+    // hide passenger from selection
+    if (seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE)
+        unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     if (me->IsInWorld())
     {
@@ -370,7 +406,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
     return true;
 }
 
-void Vehicle::RemovePassenger(Unit *unit)
+void Vehicle::RemovePassenger(Unit* unit)
 {
     if (unit->GetVehicle() != this)
         return;
@@ -395,9 +431,7 @@ void Vehicle::RemovePassenger(Unit *unit)
 
     unit->ClearUnitState(UNIT_STAT_ONVEHICLE);
 
-    if (me->GetTypeId() == TYPEID_UNIT
-        && unit->GetTypeId() == TYPEID_PLAYER
-        && seat->first == 0 && seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
+    if (me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->first == 0 && seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
     {
         me->RemoveCharmedBy(unit);
 
@@ -408,6 +442,10 @@ void Vehicle::RemovePassenger(Unit *unit)
             m_bonusHP = 0;
         }
     }
+
+    // restore passenger selection
+    if (seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE)
+        unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     if (me->IsInWorld())
     {
@@ -430,12 +468,12 @@ void Vehicle::RemovePassenger(Unit *unit)
 
 void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 {
-    Map *map = me->GetMap();
+    Map* map = me->GetMap();
     ASSERT(map != NULL);
 
     // not sure that absolute position calculation is correct, it must depend on vehicle orientation and pitch angle
     for (SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
-        if (Unit *passenger = ObjectAccessor::GetUnit(*GetBase(), itr->second.passenger))
+        if (Unit* passenger = ObjectAccessor::GetUnit(*GetBase(), itr->second.passenger))
         {
             ASSERT(passenger->IsInWorld());
             ASSERT(passenger->IsOnVehicle(GetBase()));
@@ -470,7 +508,7 @@ void Vehicle::InitMovementInfoForBase()
     if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDTURNING)
         me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_FULL_SPEED_TURNING);
     if (vehicleFlags & VEHICLE_FLAG_ALLOW_PITCHING)
-        me->AddExtraUnitMovementFlag( MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
+        me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
     if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
         me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_FULL_SPEED_PITCHING);
 }
@@ -504,4 +542,30 @@ uint8 Vehicle::GetAvailableSeatCount() const
             ++ret;
 
     return ret;
+}
+
+void Vehicle::Relocate(Position pos)
+{
+    sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::Relocate %u", me->GetEntry());
+
+    std::set<Unit*> vehiclePlayers;
+    for (int8 i = 0; i < 8; i++)
+        vehiclePlayers.insert(GetPassenger(i));
+
+    // passengers should be removed or they will have movement stuck
+    RemoveAllPassengers();
+
+    for (std::set<Unit*>::const_iterator itr = vehiclePlayers.begin(); itr != vehiclePlayers.end(); ++itr)
+    {
+        if (Unit* plr = *itr)
+        {
+            // relocate/setposition doesn't work for player
+            plr->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+            //plr->TeleportTo(pPlayer->GetMapId(), triggerPos.GetPositionX(), triggerPos.GetPositionY(), triggerPos.GetPositionZ(), triggerPos.GetOrientation(), TELE_TO_NOT_LEAVE_COMBAT);
+        }
+    }
+
+    me->SetPosition(pos, true);
+    // problems, and impossible to do delayed enter
+    //pPlayer->EnterVehicle(veh);
 }

@@ -1,5 +1,16 @@
+# Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+#
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  Commands/cs_anticheat.cpp
   Commands/cs_account.cpp
   Commands/cs_achievement.cpp
   Commands/cs_gm.cpp
@@ -13,6 +24,7 @@ set(scripts_STAT_SRCS
   Commands/cs_event.cpp
   Commands/cs_gobject.cpp
   Commands/cs_honor.cpp
+  Commands/cs_wg.cpp
   Commands/cs_wp.cpp
   Commands/cs_titles.cpp
   Commands/cs_quest.cpp

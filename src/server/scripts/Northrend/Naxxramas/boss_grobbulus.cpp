@@ -22,7 +22,7 @@
 
 #define SPELL_POISON_CLOUD          28240
 #define SPELL_MUTATING_INJECTION    28169
-#define SPELL_SLIME_SPRAY           RAID_MODE(28157,54364)
+#define SPELL_SLIME_SPRAY           RAID_MODE(28157, 54364)
 #define SPELL_BERSERK               26662
 #define SPELL_POISON_CLOUD_ADD      59116
 
@@ -50,7 +50,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_POISON_CLOUD_ADD, true);
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_CLOUD, 15000);

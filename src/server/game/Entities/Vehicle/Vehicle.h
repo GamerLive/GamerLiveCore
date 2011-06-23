@@ -23,6 +23,7 @@
 
 struct VehicleEntry;
 struct VehicleSeatEntry;
+struct Position;
 class Unit;
 
 enum PowerType
@@ -54,6 +55,7 @@ enum VehicleSeatFlags
     VEHICLE_SEAT_FLAG_CAN_CONTROL                = 0x00000800,           // Lua_UnitInVehicleControlSeat
     VEHICLE_SEAT_FLAG_UNCONTROLLED               = 0x00002000,           // can override !& VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT
     VEHICLE_SEAT_FLAG_CAN_ATTACK                 = 0x00004000,           // Can attack, cast spells and use items from vehicle?
+    VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE   = 0x00100000,           // Can't select passenger?
     VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT          = 0x02000000,           // Lua_CanExitVehicle - can enter and exit at free will
     VEHICLE_SEAT_FLAG_CAN_SWITCH                 = 0x04000000,           // Lua_CanSwitchVehicleSeats
     VEHICLE_SEAT_FLAG_CAN_CAST                   = 0x20000000,           // Lua_UnitHasVehicleUI
@@ -79,20 +81,20 @@ enum VehicleSpells
 
 struct VehicleSeat
 {
-    explicit VehicleSeat(VehicleSeatEntry const *_seatInfo) : seatInfo(_seatInfo), passenger(NULL) {}
+    explicit VehicleSeat(VehicleSeatEntry const *_seatInfo) : seatInfo(_seatInfo), passenger(0) {}
     VehicleSeatEntry const *seatInfo;
     uint64 passenger;
 };
 
 struct VehicleAccessory
 {
-    explicit VehicleAccessory(uint32 _uiAccessory, int8 _uiSeat, bool _bMinion, uint8 _uiSummonType, uint32 _uiSummonTime) :
-        uiAccessory(_uiAccessory), uiSeat(_uiSeat), bMinion(_bMinion), uiSummonType(_uiSummonType), uiSummonTime(_uiSummonTime) {}
-    uint32 uiAccessory;
-    int8 uiSeat;
-    uint32 bMinion;
-    uint8 uiSummonType;
-    uint32 uiSummonTime;
+    VehicleAccessory(uint32 entry, int8 seatId, bool isMinion, uint8 summonType, uint32 summonTime) :
+        AccessoryEntry(entry), SeatId(seatId), IsMinion(isMinion), SummonedType(summonType), SummonTime(summonTime) {}
+    uint32 AccessoryEntry;
+    int8 SeatId;
+    uint32 IsMinion;
+    uint8 SummonedType;
+    uint32 SummonTime;
 };
 
 struct VehicleScalingInfo
@@ -113,29 +115,31 @@ class Vehicle
     friend class WorldSession;
 
     public:
-        explicit Vehicle(Unit *unit, VehicleEntry const *vehInfo, uint32 creatureEntry);
+        explicit Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry);
         virtual ~Vehicle();
 
         void Install();
         void Uninstall();
-        void Reset();
-        void InstallAllAccessories();
+        void Reset(bool evading = false);
+        void InstallAllAccessories(bool evading);
+        void ApplyAllImmunities();
 
-        Unit *GetBase() const { return me; }
-        VehicleEntry const *GetVehicleInfo() const { return m_vehicleInfo; }
+        Unit* GetBase() const { return me; }
+        VehicleEntry const* GetVehicleInfo() const { return m_vehicleInfo; }
         uint32 const& GetCreatureEntry() const { return m_creatureEntry; }
 
         bool HasEmptySeat(int8 seatId) const;
-        Unit *GetPassenger(int8 seatId) const;
+        Unit* GetPassenger(int8 seatId) const;
         int8 GetNextEmptySeat(int8 seatId, bool next) const;
         uint8 GetAvailableSeatCount() const;
 
-        bool AddPassenger(Unit *passenger, int8 seatId = -1);
+        bool AddPassenger(Unit* passenger, int8 seatId = -1);
         void EjectPassenger(Unit* passenger, Unit* controller);
         void RemovePassenger(Unit *passenger);
         void RelocatePassengers(float x, float y, float z, float ang);
         void RemoveAllPassengers();
         void Dismiss();
+        void Relocate(Position pos);
         bool IsVehicleInUse() { return m_Seats.begin() != m_Seats.end(); }
 
         SeatMap m_Seats;
@@ -149,8 +153,8 @@ class Vehicle
         void InitMovementInfoForBase();
 
     protected:
-        Unit *me;
-        VehicleEntry const *m_vehicleInfo;
+        Unit* me;
+        VehicleEntry const* m_vehicleInfo;
         uint32 m_usableSeatNum;         // Number of seats that match VehicleSeatEntry::UsableByPlayer, used for proper display flags
         uint32 m_bonusHP;
         uint32 m_creatureEntry;         // Can be different than me->GetBase()->GetEntry() in case of players

@@ -113,7 +113,7 @@ public:
                 pInstance->SetData(DATA_ORMOROK_EVENT, DONE);
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             DoScriptText(SAY_KILL, me);
         }
@@ -195,7 +195,7 @@ public:
                         std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
                         for (; i != me->getThreatManager().getThreatList().end(); ++i)
                         {
-                            Unit* pTemp = Unit::GetUnit((*me),(*i)->getUnitGuid());
+                            Unit* pTemp = Unit::GetUnit((*me), (*i)->getUnitGuid());
                             if (pTemp && pTemp->GetTypeId() == TYPEID_PLAYER && pTemp->getClass() == Healer)
                             {
                                 pTarget = pTemp;

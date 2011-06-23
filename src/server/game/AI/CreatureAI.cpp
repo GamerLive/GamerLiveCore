@@ -56,13 +56,13 @@ void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/)
 
     if (!creature->HasReactState(REACT_PASSIVE) && !creature->getVictim())
     {
-        if (Unit *target = creature->SelectNearestTarget(50))
+        if (Unit* target = creature->SelectNearestTarget(50))
             creature->AI()->AttackStart(target);
         else if (creature->isSummon())
         {
             if (Unit *summoner = creature->ToTempSummon()->GetSummoner())
             {
-                Unit *target = summoner->getAttackerForHelper();
+                Unit* target = summoner->getAttackerForHelper();
                 if (!target && summoner->CanHaveThreatList() && !summoner->getThreatManager().isThreatListEmpty())
                     target = summoner->getThreatManager().getHostilTarget();
                 if (target && (creature->IsFriendlyTo(summoner) || creature->IsHostileTo(target)))
@@ -155,7 +155,7 @@ void CreatureAI::EnterEvadeMode()
     Reset();
 
     if (me->IsVehicle()) // use the same sequence of addtoworld, aireset may remove all summons!
-        me->GetVehicleKit()->Reset();
+        me->GetVehicleKit()->Reset(true);
 }
 
 /*void CreatureAI::AttackedBy(Unit* attacker)
